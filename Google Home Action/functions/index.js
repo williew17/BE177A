@@ -5,7 +5,7 @@ const functions = require('firebase-functions');
 
 const df = dialogflow({debug: true});
 
-var Questions[
+var Questions = [
 "In general, would you say your health is:",
 "In general, would you say your quality of life is:",
 "In general, how would you rate your physical health?",
@@ -18,7 +18,7 @@ var Questions[
 "In the past seven days, how would you rate your pain on average?"
 ];
 
-var Choices[
+var Choices = [
 "5, excellent; 4, very good; 3, good; 2, fair; or 1, poor",
 "5, completely; 4, mostly; 3, moderately; 2, a little; or 1, not at all",
 "5, never; 4, rarely; 3, sometimes; 2, often; or 1, always",
