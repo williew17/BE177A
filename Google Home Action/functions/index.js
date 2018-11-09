@@ -26,18 +26,29 @@ var Choices = [
 "0, no pain, up to 10, worst imaginable pain"
 ];
 
+
+//needs mapping of questions and choices
 df.intent('Patient Survey', (conv) => {
   conv.ask(Questions[0] + Choices[0]);
+  conv.contexts.set('survey', 2, {number: 1});
 });
 
 df.intent('Answer', (conv) => {
-    //store data
-    conv.ask("need to get question number");
-    //conv.ask(Questions[#questionNumber.number]);
+  //store data
+  const s = conv.contexts.get('survey');
+    if (s){
+      const questionNum = s.parameters.number;
+      conv.ask(Questions[questionNum]);
+      conv.contexts.set('survey', 2, {number: questionNum+1});
+    }
+    else {
+      conv.ask("error with context");
+    }
 });
 
+//not done at all
 df.intent('Repeat', (conv) => {
    conv.ask('previous question'); 
 });
 
-exports.dialogflowFirebaseFulfillment = functions.https.onRequest(df);
+exports.fulfillment = functions.https.onRequest(df);
