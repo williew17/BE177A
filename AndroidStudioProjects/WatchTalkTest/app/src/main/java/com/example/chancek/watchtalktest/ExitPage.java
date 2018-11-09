@@ -24,19 +24,21 @@ public class ExitPage extends WearableActivity {
         setAmbientEnabled();
 
         FileInputStream in = null;
-        String inString = "Nothing was found.";
+        String inString;
         try {
             in = openFileInput("WatchTalkTest_Results.txt");
             InputStreamReader inputStreamReader = new InputStreamReader(in);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             StringBuilder sb = new StringBuilder();
-            //inString = "AAA";
+            String line;
 
             //TODO: the app never exits this loop, need to figure out why.
-            while ((inString = bufferedReader.readLine()) != null) {
-                sb.append(inString);
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.append(line);
             }
             in.close();
+
+            inString = sb.toString();
         } catch (IOException e) {
             e.printStackTrace();
             inString = "Exception thrown";
