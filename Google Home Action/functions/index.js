@@ -26,24 +26,24 @@ var Choices = [
 "0, no pain, up to 10, worst imaginable pain"
 ];
 
-var QC_Pairs = {
+var QC_Pairs = [
 0, 0, 0, 0, 0, 0, 1, 2, 3, 4
-}
+]
 
 
 //needs mapping of questions and choices
 df.intent('Patient Survey', (conv) => {
   conv.ask(Questions[0] + Choices[0]);
-  conv.contexts.set('survey', 2, {index: 0});
+  conv.contexts.set('survey', 3, {index: 0});
 });
 
-df.intent('Answer', (conv) => {
+df.intent('Answer', (conv, {number}) => {
   //store data
   const s = conv.contexts.get('survey');
     if (s){
       const questionNum = s.parameters.index;
-      conv.ask(Questions[questionNum] + Choices[QC_Pairs[questionNum]]);
-      conv.contexts.set('survey', 2, {index: questionNum+1});
+      conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
+      conv.contexts.set('survey', 3, {index: questionNum+1});
     }
     else {
       conv.ask("error with context");
@@ -53,7 +53,7 @@ df.intent('Answer', (conv) => {
 //not done at all
 df.intent('Repeat', (conv) => {
    conv.ask(Questions[questionNum] + Choices[QC_Pairs[questionNum]]); 
-   conv.contexts.set('survey', 2, {index: questionNum});
+   conv.contexts.set('survey', 3, {index: questionNum});
 });
 
 exports.fulfillment = functions.https.onRequest(df);
