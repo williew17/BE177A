@@ -6,16 +6,16 @@ const functions = require('firebase-functions');
 const df = dialogflow({debug: true});
 
 var Questions = [
-"In general, would you say your health is:",
-"In general, would you say your quality of life is:",
-"In general, how would you rate your physical health?",
-"In general, how would you rate you mental health, including your mood and your ability to think?",
-"In general, how would you rate your satisfaction with your social activities and relationships?",
-"In general, please rate how well you carry out your usual social activities and roles. (This includes activities at home, at work, and in your community, and responsibilities as a parent, child, spouse, employee, friend, etc.)",
-"To what extent are you able to carry out your everyday physical activities such as walking, climbing stairs, carrying groceries, or moving a chair?",
-"In the past seven days, how often have you been bothered by emotional problems such as feeling anxious, depressed or irritable?",
-"In the past seven days, how would you rate your fatigue on average?",
-"In the past seven days, how would you rate your pain on average?"
+"In general, would you say your health is: ",
+"In general, would you say your quality of life is: ",
+"In general, how would you rate your physical health? ",
+"In general, how would you rate you mental health, including your mood and your ability to think? ",
+"In general, how would you rate your satisfaction with your social activities and relationships? ",
+"In general, please rate how well you carry out your usual social activities and roles. (This includes activities at home, at work, and in your community, and responsibilities as a parent, child, spouse, employee, friend, etc.) ",
+"To what extent are you able to carry out your everyday physical activities such as walking, climbing stairs, carrying groceries, or moving a chair? ",
+"In the past seven days, how often have you been bothered by emotional problems such as feeling anxious, depressed or irritable? ",
+"In the past seven days, how would you rate your fatigue on average? ",
+"In the past seven days, how would you rate your pain on average? "
 ];
 
 var Choices = [
@@ -26,20 +26,24 @@ var Choices = [
 "0, no pain, up to 10, worst imaginable pain"
 ];
 
+var QC_Pairs = {
+0, 0, 0, 0, 0, 0, 1, 2, 3, 4
+}
+
 
 //needs mapping of questions and choices
 df.intent('Patient Survey', (conv) => {
   conv.ask(Questions[0] + Choices[0]);
-  conv.contexts.set('survey', 2, {number: 1});
+  conv.contexts.set('survey', 2, {index: 0});
 });
 
 df.intent('Answer', (conv) => {
   //store data
   const s = conv.contexts.get('survey');
     if (s){
-      const questionNum = s.parameters.number;
-      conv.ask(Questions[questionNum]);
-      conv.contexts.set('survey', 2, {number: questionNum+1});
+      const questionNum = s.parameters.index;
+      conv.ask(Questions[questionNum] + Choices[QC_Pairs[questionNum]]);
+      conv.contexts.set('survey', 2, {index: questionNum+1});
     }
     else {
       conv.ask("error with context");
@@ -48,7 +52,8 @@ df.intent('Answer', (conv) => {
 
 //not done at all
 df.intent('Repeat', (conv) => {
-   conv.ask('previous question'); 
+   conv.ask(Questions[questionNum] + Choices[QC_Pairs[questionNum]]); 
+   conv.contexts.set('survey', 2, {index: questionNum});
 });
 
 exports.fulfillment = functions.https.onRequest(df);
