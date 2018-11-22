@@ -6,6 +6,7 @@ import android.support.wearable.activity.WearableActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 
 public class PinPage extends WearableActivity {
@@ -35,13 +36,18 @@ public class PinPage extends WearableActivity {
 
     public void submitPin(View view) {
 
-        String correctPin = "1234";
+        final String CORRECT_PIN = "1234";
         pincode = codeInput.getText().toString();
 
-       if (pincode.equals(correctPin)) {
+       if (pincode.equals(CORRECT_PIN)) {
             Intent intent = new Intent(this, SurveyQuestion.class);
             startActivity(intent);
         }
+        else{
+           TextView textviewError = findViewById(R.id.textViewError);
+           textviewError.setVisibility(View.VISIBLE);
+           codeInput.getText().clear();
+       }
 
     }
 

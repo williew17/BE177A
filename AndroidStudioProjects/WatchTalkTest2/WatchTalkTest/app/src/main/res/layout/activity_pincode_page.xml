@@ -6,9 +6,10 @@
     android:layout_height="match_parent">
 
     <View
-    android:layout_width="fill_parent"
-    android:layout_height="20dp"
-    android:background="#ffffff "/>
+        android:id="@+id/view"
+        android:layout_width="fill_parent"
+        android:layout_height="20dp"
+        android:background="#ffffff " />
 
     <EditText
         android:id="@+id/editTextCode"
@@ -53,5 +54,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="75dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="75dp"
+        android:layout_marginBottom="1dp"
+        android:text="Invalid Pin"
+        android:textColor="@color/dark_red"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/editTextCode"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
 </android.support.constraint.ConstraintLayout>
