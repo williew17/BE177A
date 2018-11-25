@@ -35,51 +35,120 @@ var QC_Pairs = [
 df.intent('Patient Survey', (conv) => {
   conv.ask(Questions[0] + Choices[0]);
   conv.contexts.set('survey', 3, {index: 0});
+  conv.contexts.set('Answer0', 6);
 });
 
-/*df.intent('Answer', (conv) => {
-	const s = conv.contexts.get('survey');
-	if(s) {
-		const questionNum = s.parameters.index;
-  		if (QC_Pairs[questionNum + 1] == 0){
-  			df.intent('Answer', (conv, {number}) => {
-  				conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
-  				conv.contexts.set('survey', 3, {index: questionNum+1});
-  			});
-  		} else if (QC_Pairs[questionNum + 1] == 1){
-  			df.intent('Answer1', (conv, {number}) => {
-  				conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
-  				conv.contexts.set('survey', 3, {index: questionNum+1});
-  			});
-  		} else if (QC_Pairs[questionNum + 1] == 2){
-  			df.intent('Answer2', (conv, {number}) => {
-  				conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
-  				conv.contexts.set('survey', 3, {index: questionNum+1});
-  			});
-  		} else if (QC_Pairs[questionNum + 1] == 3){
-  			df.intent('Answer3', (conv, {number}) => {
-  				conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
-  				conv.contexts.set('survey', 3, {index: questionNum+1});
-  			});
-  		} else if (QC_Pairs[questionNum + 1] == 4){
-  			df.intent('Answer4', (conv, {number}) => {
-  				conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
-  				conv.contexts.set('survey', 3, {index: questionNum+1});
-  			});
-  		}  
-	}
-	else {
-  	conv.ask("error with context");
-    }
-});*/
-
-df.intent('Answer0', (conv, {number}) => {
+df.intent('Answer0', (conv, {PROMs5}) => {
   //store data
   const s = conv.contexts.get('survey');
     if (s){
       const questionNum = s.parameters.index;
       conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
       conv.contexts.set('survey', 3, {index: questionNum+1});
+	  if (QC_Pairs[questionNum + 1] == 0) {
+			conv.contexts.set('Answer0', 3);
+	  } else if (QC_Pairs[questionNum + 1] == 1){
+  			conv.contexts.set('Answer1', 3);	
+	  } else if (QC_Pairs[questionNum + 1] == 2){
+  			conv.contexts.set('Answer2', 3);	
+  	  } else if (QC_Pairs[questionNum + 1] == 3){
+			conv.contexts.set('Answer3', 3);	
+  	  } else if (QC_Pairs[questionNum + 1] == 4){
+			conv.contexts.set('Answer4', 3);	
+  	  } 
+    }
+    else {
+      conv.ask("error with context");
+    }
+});
+
+
+df.intent('Answer1', (conv, {PROMsAMT}) => {
+	const s = conv.contexts.get('survey');
+    if (s) {
+	  const questionNum = s.parameters.index;
+      conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
+      conv.contexts.set('survey', 3, {index: questionNum+1});
+	  if (QC_Pairs[questionNum + 1] == 0) {
+			conv.contexts.set('Answer0', 3);
+	  } else if (QC_Pairs[questionNum + 1] == 1){
+  			conv.contexts.set('Answer1', 3);	
+	  } else if (QC_Pairs[questionNum + 1] == 2){
+  			conv.contexts.set('Answer2', 3);	
+  	  } else if (QC_Pairs[questionNum + 1] == 3){
+			conv.contexts.set('Answer3', 3);	
+  	  } else if (QC_Pairs[questionNum + 1] == 4){
+			conv.contexts.set('Answer4', 3);	
+  	  } 
+    }
+    else {
+      conv.ask("error with context");
+    }
+});
+
+df.intent('Answer2', (conv, {PROMsTIME}) => {
+	const s = conv.contexts.get('survey');
+    if (s){
+	  const questionNum = s.parameters.index;
+      conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
+      conv.contexts.set('survey', 3, {index: questionNum+1});
+	  if (QC_Pairs[questionNum + 1] == 0) {
+			conv.contexts.set('Answer0', 3);
+	  } else if (QC_Pairs[questionNum + 1] == 1){
+  			conv.contexts.set('Answer1', 3);	
+	  } else if (QC_Pairs[questionNum + 1] == 2){
+  			conv.contexts.set('Answer2', 3);	
+  	  } else if (QC_Pairs[questionNum + 1] == 3){
+			conv.contexts.set('Answer3', 3);	
+  	  } else if (QC_Pairs[questionNum + 1] == 4){
+			conv.contexts.set('Answer4', 3);	
+  	  } 
+    }
+    else {
+      conv.ask("error with context");
+    }
+});
+
+df.intent('Answer3', (conv, {PROMsSEV}) => {
+	const s = conv.contexts.get('survey');
+    if (s){
+	  const questionNum = s.parameters.index;
+      conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
+      conv.contexts.set('survey', 3, {index: questionNum+1});
+	  if (QC_Pairs[questionNum + 1] == 0) {
+			conv.contexts.set('Answer0', 3);
+	  } else if (QC_Pairs[questionNum + 1] == 1){
+  			conv.contexts.set('Answer1', 3);	
+	  } else if (QC_Pairs[questionNum + 1] == 2){
+  			conv.contexts.set('Answer2', 3);	
+  	  } else if (QC_Pairs[questionNum + 1] == 3){
+			conv.contexts.set('Answer3', 3);	
+  	  } else if (QC_Pairs[questionNum + 1] == 4){
+			conv.contexts.set('Answer4', 3);	
+  	  } 
+    }
+    else {
+      conv.ask("error with context");
+    }
+});
+
+df.intent('Answer4', (conv, {PROMs10}) => {
+	const s = conv.contexts.get('survey');
+    if (s){
+	  const questionNum = s.parameters.index;
+      conv.ask(Questions[questionNum + 1] + Choices[QC_Pairs[questionNum + 1]]);
+      conv.contexts.set('survey', 3, {index: questionNum+1});
+	  if (QC_Pairs[questionNum + 1] == 0) {
+			conv.contexts.set('Answer0', 3);
+	  } else if (QC_Pairs[questionNum + 1] == 1){
+  			conv.contexts.set('Answer1', 3);	
+	  } else if (QC_Pairs[questionNum + 1] == 2){
+  			conv.contexts.set('Answer2', 3);	
+  	  } else if (QC_Pairs[questionNum + 1] == 3){
+			conv.contexts.set('Answer3', 3);	
+  	  } else if (QC_Pairs[questionNum + 1] == 4){
+			conv.contexts.set('Answer4', 3);	
+  	  } 
     }
     else {
       conv.ask("error with context");
