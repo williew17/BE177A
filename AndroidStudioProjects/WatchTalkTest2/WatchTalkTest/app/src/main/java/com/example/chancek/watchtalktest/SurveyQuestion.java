@@ -121,7 +121,7 @@ public class SurveyQuestion extends WearableActivity {
                 if (resultCode == RESULT_OK && null != data) {
                     ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     // set spinner position based on received string
-                    String mString = result.toString();
+                    String mString = result.toString().toLowerCase();
 
                     spinner.setSelection(getIndex(spinner, mString));
 
@@ -138,8 +138,9 @@ public class SurveyQuestion extends WearableActivity {
         int index = 0;
 
         for (int i=0;i<spinner.getCount();i++){
-            if (spinner.getItemAtPosition(i).equals(myString)){
+            if (myString.contains(spinner.getItemAtPosition(i).toString().toLowerCase())){
                 index = i;
+                break;
             }
         }
         return index;
