@@ -1,7 +1,9 @@
 package com.example.chancek.watchtalktest;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
@@ -14,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class SurveyQuestion extends WearableActivity {
@@ -22,6 +25,8 @@ public class SurveyQuestion extends WearableActivity {
     Spinner spinner;
     /*SurveyResponse Responses = (SurveyResponse) getIntent().getSerializableExtra
             ("Serialized_Responses");*/
+
+    private static final int REQ_CODE_SPEECH_INPUT = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,5 +97,51 @@ public class SurveyQuestion extends WearableActivity {
 
         Intent intent = new Intent(this, ExitPage.class);
         startActivity(intent);
+    }
+
+    public void getVoiceInput(View view)
+    {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Hello, How can I help you?");
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+        } catch (ActivityNotFoundException a) {
+            a.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQ_CODE_SPEECH_INPUT: {
+                if (resultCode == RESULT_OK && null != data) {
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    // set spinner position based on received string
+                    String mString = result.toString();
+
+                    spinner.setSelection(getIndex(spinner, mString));
+
+                }
+                break;
+            }
+
+        }
+    }
+
+    //Get the index of the spinner element matching myString.  Return 0 if no match found
+    private int getIndex(Spinner spinner, String myString){
+
+        int index = 0;
+
+        for (int i=0;i<spinner.getCount();i++){
+            if (spinner.getItemAtPosition(i).equals(myString)){
+                index = i;
+            }
+        }
+        return index;
     }
 }
