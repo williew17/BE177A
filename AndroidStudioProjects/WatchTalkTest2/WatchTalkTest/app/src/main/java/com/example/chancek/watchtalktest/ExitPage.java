@@ -23,28 +23,13 @@ public class ExitPage extends WearableActivity {
         // Enables Always-on
         setAmbientEnabled();
 
-        FileInputStream in = null;
-        String inString;
-        try {
-            in = openFileInput("WatchTalkTest_Results.txt");
-            InputStreamReader inputStreamReader = new InputStreamReader(in);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            StringBuilder sb = new StringBuilder();
-            String line;
+       //Display date finished
+        TextView textExit = findViewById(R.id.textExit);
 
-            //TODO: the app never exits this loop, need to figure out why.
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
-            }
-            in.close();
+        Bundle extras = getIntent().getExtras();
+        String dateFinished = extras.getString("Date");
 
-            inString = sb.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-            inString = "Exception thrown";
-        }
-
-        mTextView.setText(inString);
+        textExit.setText("Your survey is complete:" + dateFinished);
 
 
     }
