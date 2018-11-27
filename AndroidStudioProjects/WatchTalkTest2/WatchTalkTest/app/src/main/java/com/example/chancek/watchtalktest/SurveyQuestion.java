@@ -47,6 +47,7 @@ public class SurveyQuestion extends WearableActivity {
     String textToken = "3171FF33-83C5-4221-9BB0-051DC747AEB9";
     String totalToken = textID + ":" + textToken;
 
+    //TODO: define what type of ArrayList this is (i.e. ArrayList<String>)
     ArrayList responseIDArray = new ArrayList();
 
     String gtoken;
@@ -113,11 +114,11 @@ public class SurveyQuestion extends WearableActivity {
                             JSONArray mapArray = response.getJSONArray("Items").getJSONObject(0).getJSONArray("Elements").getJSONObject(2).getJSONArray("Map");
 
                             // Make array for options
-                            ArrayList optionsArray = new ArrayList();
+                            ArrayList<String> optionsArray = new ArrayList<String>();
 
 
                             for (int i = 0; i < mapArray.length(); i++) {
-                                optionsArray.add(mapArray.getJSONObject(i).get("Description"));
+                                optionsArray.add(mapArray.getJSONObject(i).get("Description").toString());
                                 responseIDArray.add(mapArray.getJSONObject(i).get("ItemResponseOID"));
                             }
 
@@ -259,7 +260,7 @@ public class SurveyQuestion extends WearableActivity {
 
     }
 
-    public void LoadSpinner(ArrayList optionsArray){
+    public void LoadSpinner(ArrayList<String> optionsArray){
         Spinner spinnerOptions = findViewById(R.id.spinnerOptions);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, optionsArray);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
