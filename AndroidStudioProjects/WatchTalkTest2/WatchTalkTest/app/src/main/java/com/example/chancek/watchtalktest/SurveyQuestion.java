@@ -23,6 +23,7 @@ public class SurveyQuestion extends WearableActivity {
 
     TextToSpeech tts;
     Spinner spinner;
+    ArrayList<String> responses = new ArrayList<String>();
     /*SurveyResponse Responses = (SurveyResponse) getIntent().getSerializableExtra
             ("Serialized_Responses");*/
 
@@ -37,28 +38,80 @@ public class SurveyQuestion extends WearableActivity {
         // Enables Always-on
         setAmbientEnabled();
 
+        //Setup Spinner with answer choices
         spinner = (Spinner) findViewById(R.id.spinner);
+
+
+        //Get possible answers.
+        //TODO: answers from PROMIS
+        responses.add("Not at all");
+        responses.add("A little bit");
+        responses.add("Somewhat");
+        responses.add("Quite a bit");
+        responses.add("Very much");
+
         // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.choices_array, android.R.layout.simple_spinner_item);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout
+                .simple_spinner_item, responses);
+
+        /*ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.choices_array, android.R.layout.simple_spinner_item);*/
+
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
 
+
+
+
+        /*String message = "<speak>In the past 7 days, how much did pain interfere with your day to day activities?</speak>";
+
+        String str;
+        for (int i = 0; i < responses.size(); i++)
+        {
+            str = responses.get(i);
+            if (i == responses.size()-1)
+            {
+                str = "Or " + str + "?";
+            }
+            else
+            {
+                str = str + ", ";
+            }
+            message = message + str;
+        }*/
         tts=new TextToSpeech(SurveyQuestion.this, new TextToSpeech.OnInitListener() {
 
             @Override
             public void onInit(int status) {
-                // Ask a question
+                // Setup text-to-speech
                 if(status == TextToSpeech.SUCCESS){
-                    int result=tts.setLanguage(Locale.US);
-                    if(result==TextToSpeech.LANG_MISSING_DATA ||
-                            result==TextToSpeech.LANG_NOT_SUPPORTED){
+                    int result = tts.setLanguage(Locale.US);
+
+                    if(result == TextToSpeech.LANG_MISSING_DATA ||
+                            result == TextToSpeech.LANG_NOT_SUPPORTED){
                         Log.e("error", "This Language is not supported");
                     }
-                    else{
+
+                    else
+                    {
                         String message = "<speak>In the past 7 days, how much did pain interfere with your day to day activities?</speak>";
+
+                        /*String str;
+                        for (int i = 0; i < responses.size(); i++)
+                        {
+                            str = responses.get(i);
+                            if (i == responses.size()-1)
+                            {
+                                str = "Or " + str + "?";
+                            }
+                            else
+                            {
+                                str = str + ", ";
+                            }
+                            message = message + str;
+                        }*/
                         tts.speak(message,TextToSpeech.QUEUE_FLUSH,null,null);
                     }
                 }
@@ -66,6 +119,8 @@ public class SurveyQuestion extends WearableActivity {
                     Log.e("error", "Initialization Failed!");
             }
         });
+        //tts.shutdown();
+
     }
 
     public void submitAnswer(View view){
