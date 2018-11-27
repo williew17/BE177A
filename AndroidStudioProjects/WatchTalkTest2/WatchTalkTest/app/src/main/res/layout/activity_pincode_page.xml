@@ -5,11 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <View
-        android:id="@+id/view"
-        android:layout_width="fill_parent"
-        android:layout_height="20dp"
-        android:background="#ffffff " />
+
 
     <EditText
         android:id="@+id/editTextCode"
