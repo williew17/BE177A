@@ -36,9 +36,10 @@ import java.util.Map;
 
 public class SurveyQuestion extends WearableActivity {
 
+    //global variables for copying question string and answers
     TextToSpeech tts;
-
-
+    String gQuestion;
+    String gAnswers;
 
 
     // Initialize variables that store registration ID and token
@@ -123,6 +124,34 @@ public class SurveyQuestion extends WearableActivity {
 
                             //Load Spinner with Options
                             LoadSpinner(optionsArray);
+
+                            //use tts to speak question and answers
+                            //question is a string, options is an arrayList (need to convert into
+                            // string)
+
+                            //TODO: speak answers and use shutdown() to free up memory
+
+                            gQuestion = question;
+                            tts=new TextToSpeech(SurveyQuestion.this, new TextToSpeech.OnInitListener() {
+
+                                @Override
+                                public void onInit(int status) {
+                                    // Ask a question
+                                    if(status == TextToSpeech.SUCCESS){
+                                        int result=tts.setLanguage(Locale.US);
+                                        if(result==TextToSpeech.LANG_MISSING_DATA ||
+                                                result==TextToSpeech.LANG_NOT_SUPPORTED){
+                                            Log.e("error", "This Language is not supported");
+                                        }
+                                        else{
+                                            tts.speak(gQuestion,TextToSpeech.QUEUE_FLUSH,null,null);
+                                        }
+                                    }
+                                    else
+                                        Log.e("error", "Initialization Failed!");
+                                }
+                            });
+
 
                         } catch (JSONException e) {
                             e.printStackTrace();
