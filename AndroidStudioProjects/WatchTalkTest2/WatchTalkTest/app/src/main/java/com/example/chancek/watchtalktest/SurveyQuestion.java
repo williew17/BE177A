@@ -127,10 +127,19 @@ public class SurveyQuestion extends WearableActivity {
                             LoadSpinner(optionsArray);
 
                             //use tts to speak question and answers
-                            //question is a string, options is an arrayList (need to convert into
-                            // string)
+                            //TODO: use shutdown() to free up memory
 
-                            //TODO: speak answers and use shutdown() to free up memory
+                            gAnswers = "";
+                            for (int i = 0; i < optionsArray.size(); i++)
+                            {
+                                if (i == optionsArray.size()-1)
+                                {
+                                    gAnswers = gAnswers + "or " + optionsArray.get(i) + "?";
+                                }
+                                else {
+                                    gAnswers = gAnswers + optionsArray.get(i) + ", ";
+                                }
+                            }
 
                             gQuestion = question;
                             tts=new TextToSpeech(SurveyQuestion.this, new TextToSpeech.OnInitListener() {
@@ -145,7 +154,8 @@ public class SurveyQuestion extends WearableActivity {
                                             Log.e("error", "This Language is not supported");
                                         }
                                         else{
-                                            tts.speak(gQuestion,TextToSpeech.QUEUE_FLUSH,null,null);
+                                            String message = gQuestion + " " + gAnswers;
+                                            tts.speak(message,TextToSpeech.QUEUE_FLUSH,null,null);
                                         }
                                     }
                                     else
