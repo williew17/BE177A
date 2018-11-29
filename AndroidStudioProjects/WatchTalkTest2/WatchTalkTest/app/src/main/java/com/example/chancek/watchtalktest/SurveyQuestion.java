@@ -1,21 +1,18 @@
 package com.example.chancek.watchtalktest;
 
-import android.content.Context;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.speech.tts.TextToSpeech;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewDebug;
 import android.widget.ArrayAdapter;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -27,7 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,11 +32,14 @@ import java.util.Map;
 
 public class SurveyQuestion extends WearableActivity {
 
-    //global variables for copying question string and answers
+    // Global variables for copying question string and answers
     TextToSpeech tts;
     String gQuestion;
     String gAnswers;
+    Spinner spinnerOptions;
 
+    // Constant for speech recognition
+    private static final int REQ_CODE_SPEECH_INPUT = 100;
 
     // Initialize variables that store registration ID and token
     String textID = "0ED7B052-FDB2-4EDF-9B4B-E732F69DDF7A";
@@ -63,6 +62,7 @@ public class SurveyQuestion extends WearableActivity {
         // Enables Always-on
         setAmbientEnabled();
 
+        spinnerOptions = findViewById(R.id.spinnerOptions);
 
         // Generate participant token
          getToken(totalToken);
@@ -271,7 +271,7 @@ public class SurveyQuestion extends WearableActivity {
     }
 
     public void LoadSpinner(ArrayList<String> optionsArray){
-        Spinner spinnerOptions = findViewById(R.id.spinnerOptions);
+        //Spinner spinnerOptions = findViewById(R.id.spinnerOptions);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, optionsArray);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerOptions.setAdapter(adapter);
@@ -280,7 +280,7 @@ public class SurveyQuestion extends WearableActivity {
 
     public void submitAnswer(View view)
     {
-        Spinner spinnerOptions = findViewById(R.id.spinnerOptions);
+        //Spinner spinnerOptions = findViewById(R.id.spinnerOptions);
         String selectedAnswer = spinnerOptions.getSelectedItem().toString();
         int index = spinnerOptions.getSelectedItemPosition();
         String responseID = responseIDArray.get(index).toString();
@@ -295,6 +295,52 @@ public class SurveyQuestion extends WearableActivity {
         startActivity(intent);
     }
 
+    public void getVoiceInput(View view)
+    {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Hello, How can I help you?");
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+        } catch (ActivityNotFoundException a) {
+            a.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQ_CODE_SPEECH_INPUT: {
+                if (resultCode == RESULT_OK && null != data) {
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    // set spinner position based on received string
+                    String mString = result.toString().toLowerCase();
+
+                    spinnerOptions.setSelection(getIndex(spinnerOptions, mString));
+
+                }
+                break;
+            }
+
+        }
+    }
+
+    //Get the index of the spinner element matching myString.  Return 0 if no match found
+    private int getIndex(Spinner spinner, String myString){
+
+        int index = 0;
+
+        for (int i=0;i<spinner.getCount();i++){
+            if (myString.contains(spinner.getItemAtPosition(i).toString().toLowerCase())){
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
 }
 
 

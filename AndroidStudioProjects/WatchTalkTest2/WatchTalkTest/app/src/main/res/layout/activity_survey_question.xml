@@ -38,25 +38,24 @@
 
     <Button
         android:id="@+id/submit_button"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="5dp"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginBottom="16dp"
         android:onClick="submitAnswer"
         android:text="Submit"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/voiceInput" />
 
     <TextView
         android:id="@+id/textViewQuestion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="25dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/spinnerOptions"
         app:layout_constraintEnd_toEndOf="parent"
@@ -67,12 +66,28 @@
         android:id="@+id/spinnerOptions"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
+        android:layout_marginStart="35dp"
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="20dp"
         app:layout_constraintBottom_toTopOf="@+id/submit_button"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/voiceInput"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/blue"
+        android:onClick="getVoiceInput"
+        android:src="@android:drawable/ic_btn_speak_now"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerOptions"
+        app:layout_constraintVertical_bias="0.39999998" />
 
 
 </android.support.constraint.ConstraintLayout>
