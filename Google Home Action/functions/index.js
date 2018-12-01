@@ -6,7 +6,7 @@ const functions = require('firebase-functions');
 const df = dialogflow({debug: true});
 
 var Questions = [
-"In general, would you say your health is: ",
+'<speak>In general, would you say your health is: <break time="400ms"/>',
 "In general, would you say your quality of life is: ",
 "In general, how would you rate your physical health? ",
 "In general, how would you rate you mental health, including your mood and your ability to think? ",
@@ -19,7 +19,7 @@ var Questions = [
 ];
 
 var Choices = [
-"5, excellent; 4, very good; 3, good; 2, fair; or 1, poor",
+'5,  <break time="200ms"/> excellent; <break time="200ms"/> 4, very good; <break time="200ms"/> 3, good; <break time="200ms"/> 2, fair; or 1, <break time="200ms"/> poor</speak>',
 "5, completely; 4, mostly; 3, moderately; 2, a little; or 1, not at all",
 "5, never; 4, rarely; 3, sometimes; 2, often; or 1, always",
 "5, none; 4, mild; 3, moderate; 2, severe; or 1, very severe",
