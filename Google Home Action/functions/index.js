@@ -5,6 +5,10 @@ const functions = require('firebase-functions');
 
 const df = dialogflow({debug: true});
 
+//importing file api.js as api
+//use functions in api.js by doing api.<func1>()
+var api = require('./api');
+
 var Questions = [
 '<speak>In general, would you say your health is: <break time="400ms"/>',
 "In general, would you say your quality of life is: ",
