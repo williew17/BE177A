@@ -62,6 +62,24 @@ public class SurveyQuestion extends WearableActivity {
         // Enables Always-on
         setAmbientEnabled();
 
+        tts=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+
+            @Override
+            public void onInit(int status) {
+                // Ask a question
+                if(status == TextToSpeech.SUCCESS){
+                    int result=tts.setLanguage(Locale.US);
+                    if(result==TextToSpeech.LANG_MISSING_DATA ||
+                            result==TextToSpeech.LANG_NOT_SUPPORTED){
+                        Log.e("error", "This Language is not supported");
+                    }
+
+                }
+                else
+                    Log.e("error", "Initialization Failed!");
+            }
+        });
+
         spinnerOptions = findViewById(R.id.spinnerOptions);
 
         // Generate participant token
@@ -110,6 +128,10 @@ public class SurveyQuestion extends WearableActivity {
                             //set question into text box only if date finished is null
                             textViewQuestion.setText(question);
 
+                            //Speak question
+                            gQuestion = question;
+                            tts.speak(question,TextToSpeech.QUEUE_FLUSH,null,null);
+
                             // Make array for map
                             JSONArray mapArray = response.getJSONArray("Items").getJSONObject(0).getJSONArray("Elements").getJSONObject(2).getJSONArray("Map");
 
@@ -126,23 +148,29 @@ public class SurveyQuestion extends WearableActivity {
                             //Load Spinner with Options
                             LoadSpinner(optionsArray);
 
-                            //use tts to speak question and answers
+                            //use tts to speak answers
                             //TODO: use shutdown() to free up memory
 
                             gAnswers = "";
+                            String currentAnswer;
                             for (int i = 0; i < optionsArray.size(); i++)
                             {
                                 if (i == optionsArray.size()-1)
                                 {
-                                    gAnswers = gAnswers + "or " + optionsArray.get(i) + "?";
+                                    currentAnswer = "or " + optionsArray.get(i) + "?";
+                                    gAnswers = gAnswers + currentAnswer;
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
                                 }
                                 else {
-                                    gAnswers = gAnswers + optionsArray.get(i) + ", ";
+                                    currentAnswer = optionsArray.get(i) + ", ";
+                                    gAnswers = gAnswers + currentAnswer;
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                                    tts.playSilentUtterance(100,TextToSpeech.QUEUE_ADD,null);
                                 }
                             }
 
-                            gQuestion = question;
-                            tts=new TextToSpeech(SurveyQuestion.this, new TextToSpeech.OnInitListener() {
+
+                            /*tts=new TextToSpeech(SurveyQuestion.this, new TextToSpeech.OnInitListener() {
 
                                 @Override
                                 public void onInit(int status) {
@@ -161,7 +189,9 @@ public class SurveyQuestion extends WearableActivity {
                                     else
                                         Log.e("error", "Initialization Failed!");
                                 }
-                            });
+                            });*/
+                            //String message = gQuestion + " " + gAnswers;
+                            //tts.speak(message,TextToSpeech.QUEUE_FLUSH,null,null);
 
 
                         } catch (JSONException e) {

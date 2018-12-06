@@ -11,6 +11,7 @@ public class MainActivity extends WearableActivity {
 
     //SurveyResponse Responses = new SurveyResponse();
 
+    public boolean useSecure = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,7 +23,11 @@ public class MainActivity extends WearableActivity {
 
     public void startSurvey(View view)
     {
-        Intent intent = new Intent(this, PinPage.class);
+        Intent intent;
+        if (useSecure)
+            intent = new Intent(this, PinPage.class);
+        else
+            intent = new Intent(this, SurveyQuestion.class);
         //intent.putExtra("Serialized_Responses", Responses);
         startActivity(intent);
     }
