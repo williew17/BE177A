@@ -1,10 +1,23 @@
 package com.example.chancek.watchtalktest;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Base64;
 import android.util.Log;
@@ -37,6 +50,11 @@ public class SurveyQuestion extends WearableActivity {
     String gQuestion;
     String gAnswers;
     Spinner spinnerOptions;
+    Vibrator vibrator;
+
+    int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 10;
+
+    private SpeechRecognizer mySR;
 
     // Constant for speech recognition
     private static final int REQ_CODE_SPEECH_INPUT = 100;
@@ -52,6 +70,8 @@ public class SurveyQuestion extends WearableActivity {
     String gtoken;
     String URL;
 
+    //Uri notification;
+    //Ringtone ring;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +82,23 @@ public class SurveyQuestion extends WearableActivity {
         // Enables Always-on
         setAmbientEnabled();
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            ActivityCompat.requestPermissions(SurveyQuestion.this, new String[]{Manifest.permission
+                    .RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+        }
+
+        //notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        //ring = RingtoneManager.getRingtone(getApplicationContext(),notification);
+        //ring.play();
+
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+
+        mySR = SpeechRecognizer.createSpeechRecognizer(this);
+        mySR.setRecognitionListener(new listener());
+
         tts=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
 
             @Override
@@ -69,6 +106,28 @@ public class SurveyQuestion extends WearableActivity {
                 // Ask a question
                 if(status == TextToSpeech.SUCCESS){
                     int result=tts.setLanguage(Locale.US);
+
+                    //Whenever TTS finishes speaking a line with "utteranceID" =
+                    // TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, vibrate and trigger voice
+                    // recognition
+                    tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                        @Override
+                        public void onDone(String utteranceId) {
+                            // Log.d("MainActivity", "TTS finished");
+
+                            vibrator.vibrate(300);
+                            getVoiceInput_noUI();
+
+                        }
+
+                        @Override
+                        public void onError(String utteranceId) {
+                        }
+
+                        @Override
+                        public void onStart(String utteranceId) {
+                        }
+                    });
                     if(result==TextToSpeech.LANG_MISSING_DATA ||
                             result==TextToSpeech.LANG_NOT_SUPPORTED){
                         Log.e("error", "This Language is not supported");
@@ -82,10 +141,67 @@ public class SurveyQuestion extends WearableActivity {
 
         spinnerOptions = findViewById(R.id.spinnerOptions);
 
+
         // Generate participant token
          getToken(totalToken);
 
 
+    }
+
+    class listener implements RecognitionListener
+    {
+        public void onReadyForSpeech(Bundle params)
+        {
+            vibrator.vibrate(1000);
+            //tts.speak("Ready",TextToSpeech.QUEUE_FLUSH,null,null);
+            //Log.d(TAG, "onReadyForSpeech");
+        }
+        public void onBeginningOfSpeech()
+        {
+            //Log.d(TAG, "onBeginningOfSpeech");
+        }
+        public void onRmsChanged(float rmsdB)
+        {
+            //Log.d(TAG, "onRmsChanged");
+        }
+        public void onBufferReceived(byte[] buffer)
+        {
+            //Log.d(TAG, "onBufferReceived");
+        }
+        public void onEndOfSpeech()
+        {
+            tts.speak("end of speech",TextToSpeech.QUEUE_FLUSH,null,null);
+            //Log.d(TAG, "onEndofSpeech");
+        }
+        public void onError(int error)
+        {
+            tts.speak("error",TextToSpeech.QUEUE_FLUSH,null,null);
+            //Log.d(TAG,  "error " +  error);
+            //mText.setText("error " + error);
+        }
+        public void onResults(Bundle results)
+        {
+            tts.speak("OK",TextToSpeech.QUEUE_FLUSH,null,null);
+            String str = "";
+            //Log.d(TAG, "onResults " + results);
+            ArrayList data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            for (int i = 0; i < data.size(); i++)
+            {
+                //Log.d(TAG, "result " + data.get(i));
+                str += data.get(i);
+            }
+            String mString = str.toLowerCase();
+
+            spinnerOptions.setSelection(getIndex(spinnerOptions, mString));
+        }
+        public void onPartialResults(Bundle partialResults)
+        {
+            //Log.d(TAG, "onPartialResults");
+        }
+        public void onEvent(int eventType, Bundle params)
+        {
+            //Log.d(TAG, "onEvent " + eventType);
+        }
     }
 
 
@@ -130,7 +246,8 @@ public class SurveyQuestion extends WearableActivity {
 
                             //Speak question
                             gQuestion = question;
-                            tts.speak(question,TextToSpeech.QUEUE_FLUSH,null,null);
+                            tts.speak(question,TextToSpeech.QUEUE_FLUSH,null,
+                                    null);
 
                             // Make array for map
                             JSONArray mapArray = response.getJSONArray("Items").getJSONObject(0).getJSONArray("Elements").getJSONObject(2).getJSONArray("Map");
@@ -149,8 +266,6 @@ public class SurveyQuestion extends WearableActivity {
                             LoadSpinner(optionsArray);
 
                             //use tts to speak answers
-                            //TODO: use shutdown() to free up memory
-
                             gAnswers = "";
                             String currentAnswer;
                             for (int i = 0; i < optionsArray.size(); i++)
@@ -159,7 +274,7 @@ public class SurveyQuestion extends WearableActivity {
                                 {
                                     currentAnswer = "or " + optionsArray.get(i) + "?";
                                     gAnswers = gAnswers + currentAnswer;
-                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID);
                                 }
                                 else {
                                     currentAnswer = optionsArray.get(i) + ", ";
@@ -335,6 +450,22 @@ public class SurveyQuestion extends WearableActivity {
             startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
         } catch (ActivityNotFoundException a) {
             a.printStackTrace();
+        }
+    }
+
+    public void getVoiceInput_noUI()
+    {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        //intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,"voice" +
+        //".recognition.test");
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        //intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,5);
+        if (!mySR.isRecognitionAvailable(this))
+            tts.speak("Error: voice recognition not available",TextToSpeech.QUEUE_FLUSH,null, null);
+        else {
+            tts.speak("Starting", TextToSpeech.QUEUE_FLUSH, null, null);
+            mySR.startListening(intent);
         }
     }
 
