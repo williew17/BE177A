@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 public class SurveyQuestion extends WearableActivity {
 
@@ -169,7 +170,10 @@ public class SurveyQuestion extends WearableActivity {
         public void onRmsChanged(float rmsdB) { Log.d(TAG, "onRmsChanged"); }
         public void onBufferReceived(byte[] buffer) { Log.d(TAG, "onBufferReceived"); }
         public void onEndOfSpeech() { Log.d(TAG, "onEndOfSpeech"); }
-        public void onError(int error) { Log.d(TAG,  "error " +  error); }
+        public void onError(int error) {
+            Log.d(TAG,  "error " +  error);
+            getVoiceInput_noUI(1);
+        }
         public void onResults(Bundle results)
         {
             String str = "";
@@ -491,7 +495,10 @@ public class SurveyQuestion extends WearableActivity {
                 SurveyQuestion.handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        tts.speak("OK.", TextToSpeech.QUEUE_FLUSH,null,null);
+                        String[] randOptions = {"OK", "Sure", "Of course"};
+                        int rndIdx = new Random().nextInt(randOptions.length);
+                        tts.speak(randOptions[rndIdx], TextToSpeech.QUEUE_FLUSH,null,null);
+                        tts.playSilentUtterance(50,TextToSpeech.QUEUE_ADD,null);
                         tts.speak(gQuestion,TextToSpeech.QUEUE_ADD,null, null);
 
                         String currentAnswer;
@@ -511,12 +518,13 @@ public class SurveyQuestion extends WearableActivity {
                     }
                 });
             }
-            else
+            else // code == 1
             {
                 SurveyQuestion.handler.post(new Runnable() {
                     @Override
                     public void run() {
-
+                        tts.speak("Sorry, I didn't catch that.  Please repeat your answer.", TextToSpeech.QUEUE_FLUSH,
+                                null, TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID);
                     }
                 });
             }
