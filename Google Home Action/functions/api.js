@@ -38,18 +38,18 @@ module.exports = {
             // console.log(info); //JSON format
             var all_questions = []
             for (var i = 0; i < items.length; i++){
-              var _div = []
-              _div.push(items[i].ID + ":")
+              var _div = ""
+              //_div.push(items[i].ID + ":")
               for (var j = 0; j < items[i].Elements.length; j++) {
                 if (typeof(items[i].Elements[j].Map) == "undefined") {
-                  _div.push(items[i].Elements[j].Description);
+                  _div += (items[i].Elements[j].Description) + " ";
                 }
                 else {
                   var map = ""
                   for (var n = 0; n < items[i].Elements[j].Map.length; n++) {
                     map += "(" + items[i].Elements[j].Map[n].Value + "):"+  items[i].Elements[j].Map[n].Description + "    " ;
                   }
-                  _div.push(map);
+                  _div += "   " + map;
                 }
               }
               all_questions.push(_div)

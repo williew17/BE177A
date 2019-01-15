@@ -9,7 +9,7 @@ const df = dialogflow({debug: true});
 //use functions in api.js by doing api.<func1>()
 var api = require('./api');
 
-var Questions = [
+/*var Questions = [
 '<speak>In general, would you say your health is: <break time="400ms"/>',
 "In general, would you say your quality of life is: ",
 "In general, how would you rate your physical health? ",
@@ -22,6 +22,7 @@ var Questions = [
 "In the past seven days, how would you rate your pain on average? "
 ];
 
+
 var Choices = [
 '5,  <break time="200ms"/> excellent; <break time="200ms"/> 4, very good; <break time="200ms"/> 3, good; <break time="200ms"/> 2, fair; or 1, <break time="200ms"/> poor</speak>',
 "5, completely; 4, mostly; 3, moderately; 2, a little; or 1, not at all",
@@ -32,12 +33,14 @@ var Choices = [
 
 var QC_Pairs = [
 0, 0, 0, 0, 0, 0, 1, 2, 3, 4
-]
+]*/
+
+var Questions = getForm("037D7B69-FCB2-482E-A1CE-9A4D017D24AD")
 
 
 //needs mapping of questions and choices
 df.intent('Patient Survey', (conv) => {
-  conv.ask(Questions[0] + Choices[0]);
+  conv.ask(Questions[0]);
   conv.contexts.set('survey', 3, {index: 0});
   conv.contexts.set('Answer0', 6);
 });
