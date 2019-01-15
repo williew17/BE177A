@@ -1,0 +1,50 @@
+<!DOCTYPE html> 
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('#click').click(function listForms() {
+        $.ajax({
+            url: "https://www.assessmentcenter.net/ac_api/2014-01/Forms/.json",
+            cache: false,
+            type: "POST",
+            data: "",
+            dataType: "json",
+
+            beforeSend: function(xhr) {
+                var ascii = btoa("0ED7B052-FDB2-4EDF-9B4B-E732F69DDF7A" + 
+                ":" + "3171FF33-83C5-4221-9BB0-051DC747AEB9");
+                xhr.setRequestHeader("Authorization", "Basic " + ascii);
+            },
+
+            success: function(data) { 
+                //Form is an array of Objects with Name and OID
+                var container = document.getElementById("Content");
+                for(let form of data.Form){
+                    var myform = document.createElement("div");
+                    myform.innerHTML = form.OID + " : " + form.Name + "";
+                    container.appendChild(myform);
+                }
+            },
+        
+            error: function(jqXHR, textStatus, errorThrown) {
+                document.write(jqXHR.responseText + ':' + textStatus + ':' + errorThrown);
+            }
+        })
+    })
+})
+</script>
+</head>
+
+<body>
+<div id="Header">
+<button id="click" type="button">List Forms</button>
+</div>
+<div id="Content">
+</div>
+</body>
+</html>
