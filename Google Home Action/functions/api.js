@@ -34,8 +34,25 @@ module.exports = {
          
         function callback(error, response, body) {
           if (!error && response.statusCode == 200) {
-            var info = JSON.parse(body);
-          console.log(info); //JSON format where the {OID:_____, Name: ______}
+            var items = JSON.parse(body).Items;
+            // console.log(info); //JSON format
+            for (var i = 0; i < items.length; i++){
+              var _div = []
+              _div.push(items[i].ID + ":")
+              for (var j = 0; j < items[i].Elements.length; j++) {
+                if (typeof(items[i].Elements[j].Map) == "undefined") {
+                  _div.push(items[i].Elements[j].Description);
+                }
+                else {
+                  var map = ""
+                  for (var n = 0; n < items[i].Elements[j].Map.length; n++) {
+                    map += "(" + items[i].Elements[j].Map[n].Value + "):"+  items[i].Elements[j].Map[n].Description + "    " ;
+                  }
+                  _div.push(map);
+                }
+              }
+            }
+            console.log(_div)
           }
           else {
               console.log('failure')
