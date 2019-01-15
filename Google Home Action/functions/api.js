@@ -17,15 +17,33 @@ module.exports = {
         function callback(error, response, body) {
           if (!error && response.statusCode == 200) {
             var info = JSON.parse(body);
-            console.log(info);
+          console.log(info); //JSON format where the {OID:_____, Name: ______}
           }
         }
          
         request(options, callback);
     },
     
-    getForm: function () {
-      return "getForm";
+    getForm: function (formID) {
+      var options = {
+          url: startURL + 'Forms/' + formID + '.json',
+          headers: {
+            'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
+          }
+        };
+         
+        function callback(error, response, body) {
+          if (!error && response.statusCode == 200) {
+            var info = JSON.parse(body);
+          console.log(info); //JSON format where the {OID:_____, Name: ______}
+          }
+          else {
+              console.log('failure')
+          }
+          
+        }
+         
+        request(options, callback);
     },
     
     registerTest: function () {
