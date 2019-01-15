@@ -36,6 +36,7 @@ module.exports = {
           if (!error && response.statusCode == 200) {
             var items = JSON.parse(body).Items;
             // console.log(info); //JSON format
+            var all_questions = []
             for (var i = 0; i < items.length; i++){
               var _div = []
               _div.push(items[i].ID + ":")
@@ -51,8 +52,9 @@ module.exports = {
                   _div.push(map);
                 }
               }
+              all_questions.push(_div)
             }
-            console.log(_div)
+            console.log(all_questions)
           }
           else {
               console.log('failure')
