@@ -9,7 +9,7 @@ module.exports = {
     },
     
     getForm: function () {
-      //whatever  
+      //whatever
     },
     
     registerTest: function () {
