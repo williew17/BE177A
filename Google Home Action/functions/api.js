@@ -19,6 +19,9 @@ module.exports = {
             var info = JSON.parse(body);
           console.log(info); //JSON format where the {OID:_____, Name: ______}
           }
+          else {
+              console.log("Error: Cannot get formID's")
+          }
         }
          
         request(options, callback);
@@ -57,7 +60,7 @@ module.exports = {
             console.log(all_questions)
           }
           else {
-              console.log('failure')
+              console.log("Error: Cannot retrieve Form Info.")
           }
           
         }
@@ -65,15 +68,51 @@ module.exports = {
         request(options, callback);
     },
     
-    registerTest: function () {
-      return "register";
+    registerTest: function (formID) {
+      var options = {
+          url: startURL + 'Assessments/' + formID +'.json',
+          headers: {
+            'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
+          }
+        };
+        function callback(error, response, body) {
+          if (!error && response.statusCode == 200) {
+            var info = JSON.parse(body);
+          console.log(info); //JSON format where the {OID:_____, Name: ______}
+          }
+          else {
+              console.log("Error: Cannot get formID's")
+          }
+        }
+         
+        request(options, callback);
+
     },
+    
+    
     
     administerTest: function () {
       return "administer" ;
     },
     
-    testResults: function () {
-      return "testResults";
-    }
-};
+    testResults: function (AssessmentToken) {
+      var options = {
+          url: startURL + 'Results/' + AssessmentToken +'.json',
+          headers: {
+            'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
+          }
+        };
+         
+        function callback(error, response, body) {
+          if (!error && response.statusCode == 200) {
+            var info = JSON.parse(body);
+            return info;
+          }
+          else {
+              console.log("Error: Cannot get formID's")
+          }
+        }
+         
+        return request(options, callback);
+    },
+    };

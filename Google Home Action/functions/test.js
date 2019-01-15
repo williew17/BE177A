@@ -12,5 +12,6 @@ const server = http.createServer((req, res) => {
 server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
   //api.getFormID();
-  api.getForm('037D7B69-FCB2-482E-A1CE-9A4D017D24AD');
-});
+  console.log(api.registerTest('037D7B69-FCB2-482E-A1CE-9A4D017D24AD'));
+  });
+  
