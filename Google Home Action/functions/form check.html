@@ -7,9 +7,9 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
 $(document).ready(function(){
-    $('#click').click(function listForms() {
+    $('#listForms').click(function () {
         $.ajax({
-            url: "https://www.assessmentcenter.net/ac_api/2014-01/Forms/.json",
+            url: "https://www.assessmentcenter.net/ac_api/2014-01/Forms/.json", 
             cache: false,
             type: "POST",
             data: "",
@@ -22,12 +22,49 @@ $(document).ready(function(){
             },
 
             success: function(data) { 
-                //Form is an array of Objects with Name and OID
+                //data.Form lists {Name, OID}
                 var container = document.getElementById("Content");
+                $("#Content").empty();
                 for(let form of data.Form){
                     var myform = document.createElement("div");
                     myform.innerHTML = form.OID + " : " + form.Name + "";
                     container.appendChild(myform);
+                }
+            },
+        
+            error: function(jqXHR, textStatus, errorThrown) {
+                document.write(jqXHR.responseText + ':' + textStatus + ':' + errorThrown);
+            }
+        })
+    })
+    
+    $('#formDetails').click(function () {
+        $.ajax({
+            url: "https://www.assessmentcenter.net/ac_api/2014-01/Forms/D2FA612D-C290-4B88-957D-1C27F48EE58C.json", 
+            cache: false,
+            type: "POST",
+            data: "",
+            dataType: "json",
+
+            beforeSend: function(xhr) {
+                var ascii = btoa("0ED7B052-FDB2-4EDF-9B4B-E732F69DDF7A" + 
+                ":" + "3171FF33-83C5-4221-9BB0-051DC747AEB9");
+                xhr.setRequestHeader("Authorization", "Basic " + ascii);
+            },
+
+            success: function(data) { 
+                //data.Items lists Elements, either contains Map of {Values, Descriptions} or Description
+                var container = document.getElementById("Content");
+                $("#Content").empty();
+                for(let item of data.Items){
+                    var myElement = document.createElement("div");
+                    if("Map" in item){
+                        myElement.innerHTML = ""; //Needs to be filled in
+                    }
+                    else{
+                    //needs to be filled in
+                    }
+                    container.appendChild(myElement);
                 }
             },
         
@@ -42,7 +79,8 @@ $(document).ready(function(){
 
 <body>
 <div id="Header">
-<button id="click" type="button">List Forms</button>
+<button id="listForms" type="button">List Forms</button>
+<button id="formDetails" type="button">Form Details</button>
 </div>
 <div id="Content">
 </div>
