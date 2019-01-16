@@ -15,7 +15,7 @@ public class MainActivity extends WearableActivity {
 
     //SurveyResponse Responses = new SurveyResponse();
     int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 10;
-    public boolean useSecure = false;
+    boolean useSecure = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

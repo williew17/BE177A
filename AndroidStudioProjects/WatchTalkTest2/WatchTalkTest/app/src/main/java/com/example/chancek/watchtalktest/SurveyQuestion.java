@@ -4,14 +4,9 @@ import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -49,20 +44,17 @@ import java.util.Random;
 
 public class SurveyQuestion extends WearableActivity {
 
-    // Global variables for copying question string and answers
-    TextToSpeech tts;
-    String gQuestion;
-
-    Spinner spinnerOptions;
-    Vibrator vibrator;
-
-    Button submitButton;
-
+    // Global variables
     int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 10;
 
-    private SpeechRecognizer mySR;
+    TextToSpeech tts;
+    String gQuestion;
+    Spinner spinnerOptions;
+    Vibrator vibrator;
+    Button submitButton;
 
-    // Constant for speech recognition
+    //Private variables
+    private SpeechRecognizer mySR;
     private static final int REQ_CODE_SPEECH_INPUT = 100;
 
     // Initialize variables that store registration ID and token
@@ -76,13 +68,12 @@ public class SurveyQuestion extends WearableActivity {
     // Make array for options
     ArrayList<String> optionsArray = new ArrayList<>();
 
-    String gtoken;
+    String gToken;
     String URL;
     String TAG = "WATCHTALKTEST";
 
+    // Initialize handler for running tts, voice recognition in main thread
     public static Handler handler;
-    //Uri notification;
-    //Ringtone ring;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +96,7 @@ public class SurveyQuestion extends WearableActivity {
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
         submitButton = findViewById(R.id.submit_button);
+        submitButton.setEnabled(false);
 
         mySR = SpeechRecognizer.createSpeechRecognizer(this);
         mySR.setRecognitionListener(new listener());
@@ -124,8 +116,7 @@ public class SurveyQuestion extends WearableActivity {
                         @Override
                         public void onDone(String utteranceId) {
                             // Log.d("MainActivity", "TTS finished");
-
-                            vibrator.vibrate(300);
+                            //vibrator.vibrate(300);
                             getVoiceInput_noUI();
 
                         }
@@ -162,32 +153,40 @@ public class SurveyQuestion extends WearableActivity {
     {
         public void onReadyForSpeech(Bundle params)
         {
-            // TODO: vibrator.vibrate(300);
-            //tts.speak("Ready",TextToSpeech.QUEUE_FLUSH,null,null);
             Log.d(TAG, "onReadyForSpeech");
         }
-        public void onBeginningOfSpeech() { Log.d(TAG, "onBeginningOfSpeech"); }
-        public void onRmsChanged(float rmsdB) { Log.d(TAG, "onRmsChanged"); }
-        public void onBufferReceived(byte[] buffer) { Log.d(TAG, "onBufferReceived"); }
-        public void onEndOfSpeech() { Log.d(TAG, "onEndOfSpeech"); }
+        public void onBeginningOfSpeech() {
+            Log.d(TAG, "onBeginningOfSpeech");
+        }
+        public void onRmsChanged(float rmsdB) {
+            Log.d(TAG, "onRmsChanged");
+        }
+        public void onBufferReceived(byte[] buffer) {
+            Log.d(TAG, "onBufferReceived");
+        }
+        public void onEndOfSpeech() {
+            Log.d(TAG, "onEndOfSpeech");
+        }
         public void onError(int error) {
-            Log.d(TAG,  "error " +  error);
+            //Log.d(TAG,  "error " +  error);
             getVoiceInput_noUI(1);
         }
         public void onResults(Bundle results)
         {
+            // Once user has finished speaking, respond appropriately
             String str = "";
             Log.d(TAG, "onResults " + results);
             ArrayList data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             for (int i = 0; i < data.size(); i++)
             {
-                Log.d(TAG, "result " + data.get(i));
+                //Log.d(TAG, "result " + data.get(i));
                 str += data.get(i);
             }
             String mString = str.toLowerCase();
 
             int idx = getIndex(spinnerOptions, mString);
             if (idx != -1) {
+                // Valid answer received
                 spinnerOptions.setSelection(idx);
                 submitButton.setEnabled(false);
                 new CountDownTimer(500,100){
@@ -196,7 +195,6 @@ public class SurveyQuestion extends WearableActivity {
                     }
 
                     public void onFinish() {
-                        submitButton.setEnabled(true);
                         submitAnswer();
                     }
 
@@ -229,7 +227,7 @@ public class SurveyQuestion extends WearableActivity {
         // Make Request
         final RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        gtoken = itoken;
+        gToken = itoken;
 
         if (responseID == null) {
             URL = "https://www.assessmentcenter.net/ac_api/2014-01/Participants/" + itoken + ".json";
@@ -282,8 +280,9 @@ public class SurveyQuestion extends WearableActivity {
                             }
 
 
-                            //Load Spinner with Options
+                            //Load Spinner with Options, re-enable submit button
                             LoadSpinner(optionsArray);
+                            //submitButton.setEnabled(true);
 
                             //use tts to speak answers
                             String currentAnswer;
@@ -418,23 +417,26 @@ public class SurveyQuestion extends WearableActivity {
     // submit via button
     public void submitAnswer(View view)
     {
-        String selectedAnswer = spinnerOptions.getSelectedItem().toString();
+        //String selectedAnswer = spinnerOptions.getSelectedItem().toString();
+        tts.stop();
+        mySR.cancel();
+        submitButton.setEnabled(false);
         int index = spinnerOptions.getSelectedItemPosition();
         String responseID = responseIDArray.get(index).toString();
         String valueID = Integer.toString(index + 1);
-        getQuestions(gtoken,responseID,valueID);
+        getQuestions(gToken,responseID,valueID);
 
     }
 
     // submit via code
     public void submitAnswer()
     {
-        String selectedAnswer = spinnerOptions.getSelectedItem().toString();
+        //String selectedAnswer = spinnerOptions.getSelectedItem().toString();
         int index = spinnerOptions.getSelectedItemPosition();
         String responseID = responseIDArray.get(index).toString();
         String valueID = Integer.toString(index + 1);
-        submitButton.setEnabled(true);
-        getQuestions(gtoken,responseID,valueID);
+
+        getQuestions(gToken,responseID,valueID);
 
     }
 
@@ -446,7 +448,7 @@ public class SurveyQuestion extends WearableActivity {
         startActivity(intent);
     }
 
-    public void getVoiceInput(View view)
+    /*public void getVoiceInput(View view)
     {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -457,7 +459,7 @@ public class SurveyQuestion extends WearableActivity {
         } catch (ActivityNotFoundException a) {
             a.printStackTrace();
         }
-    }
+    }*/
 
     // Get voice input without displaying the default pop-up window.
     public void getVoiceInput_noUI()
@@ -476,6 +478,7 @@ public class SurveyQuestion extends WearableActivity {
                     intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
                     mySR.startListening(intent);
                     Log.d(TAG, "started listening");
+                    submitButton.setEnabled(true);
                 }
             });
 

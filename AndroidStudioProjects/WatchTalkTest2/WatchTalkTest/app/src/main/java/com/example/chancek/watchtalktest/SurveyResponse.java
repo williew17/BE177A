@@ -1,3 +1,4 @@
+/*
 package com.example.chancek.watchtalktest;
 
 import java.io.Serializable;
@@ -46,3 +47,4 @@ public class SurveyResponse implements Serializable {
     }
 
 }
+*/
