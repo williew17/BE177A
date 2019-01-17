@@ -35,10 +35,10 @@ var QC_Pairs = [
 0, 0, 0, 0, 0, 0, 1, 2, 3, 4
 ]*/
 
-var Questions = getForm("037D7B69-FCB2-482E-A1CE-9A4D017D24AD")
+var Questions = api.getForm("037D7B69-FCB2-482E-A1CE-9A4D017D24AD")
 
 
-//needs mapping of questions and choices
+/*
 df.intent('Patient Survey', (conv) => {
   conv.ask(Questions[0]);
   conv.contexts.set('survey', 3, {index: 0});
@@ -162,10 +162,25 @@ df.intent('Answer4', (conv, {PROMs10}) => {
     }
 });
 
+
 //not done at all
 df.intent('Repeat', (conv) => {
    conv.ask(Questions[questionNum] + Choices[QC_Pairs[questionNum]]); 
    conv.contexts.set('survey', 3, {index: questionNum});
 });
-
+*/
+/*
+df.intent('Response', (conv, {num, phrase}) => {
+    const s = conv.contexts.get('survey');
+    if(num in numbers){
+    
+    }
+    else if(phrase in answers){
+        
+    }
+    else{
+        conv.ask("Sorry, we were unable to match your answer to the choices provided. Could you repeat that?");
+    }
+})
+*/
 exports.fulfillment = functions.https.onRequest(df);
