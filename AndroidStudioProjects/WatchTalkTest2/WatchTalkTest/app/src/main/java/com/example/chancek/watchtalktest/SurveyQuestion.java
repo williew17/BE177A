@@ -53,6 +53,10 @@ public class SurveyQuestion extends WearableActivity {
     Vibrator vibrator;
     Button submitButton;
 
+    // UtteranceID strings for use with tts
+    public static final String QUESTION_DONE = "QDone";
+    public static final String ANSWERS_DONE = "ADone";
+
     //Private variables
     private SpeechRecognizer mySR;
     private static final int REQ_CODE_SPEECH_INPUT = 100;
@@ -110,14 +114,19 @@ public class SurveyQuestion extends WearableActivity {
                     int result=tts.setLanguage(Locale.US);
 
                     //Whenever TTS finishes speaking a line with "utteranceID" =
-                    // TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, vibrate and trigger voice
+                    // ANSWERS_DONE, vibrate and trigger voice
                     // recognition
                     tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                         @Override
                         public void onDone(String utteranceId) {
-                            // Log.d("MainActivity", "TTS finished");
-                            //vibrator.vibrate(300);
-                            getVoiceInput_noUI();
+                            Log.d("MainMenu", "TTS finished");
+
+                            if (utteranceId.equals(QUESTION_DONE)){
+                                submitButton.setEnabled(true);
+                            }
+                            else if (utteranceId.equals(ANSWERS_DONE)){
+                                getVoiceInput_noUI();
+                            }
 
                         }
 
@@ -264,8 +273,7 @@ public class SurveyQuestion extends WearableActivity {
 
                             //Speak question
                             gQuestion = question;
-                            tts.speak(question,TextToSpeech.QUEUE_FLUSH,null,
-                                    null);
+                            tts.speak(question,TextToSpeech.QUEUE_FLUSH,null, QUESTION_DONE);
 
                             // Make array for map
                             JSONArray mapArray = response.getJSONArray("Items").getJSONObject(0).getJSONArray("Elements").getJSONObject(2).getJSONArray("Map");
@@ -280,9 +288,8 @@ public class SurveyQuestion extends WearableActivity {
                             }
 
 
-                            //Load Spinner with Options, re-enable submit button
+                            //Load Spinner with Options
                             LoadSpinner(optionsArray);
-                            //submitButton.setEnabled(true);
 
                             //use tts to speak answers
                             String currentAnswer;
@@ -291,7 +298,7 @@ public class SurveyQuestion extends WearableActivity {
                                 if (i == optionsArray.size()-1)
                                 {
                                     currentAnswer = "or " + optionsArray.get(i) + "?";
-                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID);
+                                    tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,ANSWERS_DONE);
                                 }
                                 else {
                                     currentAnswer = optionsArray.get(i) + ", ";
@@ -510,7 +517,7 @@ public class SurveyQuestion extends WearableActivity {
                             if (i == optionsArray.size()-1)
                             {
                                 currentAnswer = "or " + optionsArray.get(i) + "?";
-                                tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID);
+                                tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,ANSWERS_DONE);
                             }
                             else {
                                 currentAnswer = optionsArray.get(i) + ", ";
@@ -527,7 +534,7 @@ public class SurveyQuestion extends WearableActivity {
                     @Override
                     public void run() {
                         tts.speak("Sorry, I didn't catch that.  Please repeat your answer.", TextToSpeech.QUEUE_FLUSH,
-                                null, TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID);
+                                null, ANSWERS_DONE);
                     }
                 });
             }
