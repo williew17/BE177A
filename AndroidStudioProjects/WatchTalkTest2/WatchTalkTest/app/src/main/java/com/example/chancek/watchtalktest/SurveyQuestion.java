@@ -153,7 +153,16 @@ public class SurveyQuestion extends WearableActivity {
 
 
         // Generate participant token
-         getToken(totalToken);
+
+        // PROMIS Pain interference non-CAT
+        String testOID = "C1E44752-BCBD-4130-A307-67F6758F3891";
+
+        // ASCQ Me Social Functioning impact CAT
+        //String testOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F";
+
+        String tokenURL = "https://www.assessmentcenter.net/ac_api/2014-01/Assessments/" +
+                testOID + ".json";
+        getToken(tokenURL);
 
 
     }
@@ -236,6 +245,7 @@ public class SurveyQuestion extends WearableActivity {
         // Make Request
         final RequestQueue requestQueue = Volley.newRequestQueue(this);
 
+        //itoken is OID, update gToken accordingly
         gToken = itoken;
 
         if (responseID == null) {
@@ -255,7 +265,7 @@ public class SurveyQuestion extends WearableActivity {
                             String dateFinished = response.getString("DateFinished");
 
                             if (!dateFinished.equals("") && !dateFinished.equals(null)){
-                                callExitPage(dateFinished);
+                                callExitPage(dateFinished, gToken);
                             }
 
                             JSONArray elementsArray = response.getJSONArray("Items").getJSONObject(0).getJSONArray("Elements");
@@ -276,7 +286,10 @@ public class SurveyQuestion extends WearableActivity {
                             tts.speak(question,TextToSpeech.QUEUE_FLUSH,null, QUESTION_DONE);
 
                             // Make array for map
-                            JSONArray mapArray = response.getJSONArray("Items").getJSONObject(0).getJSONArray("Elements").getJSONObject(2).getJSONArray("Map");
+                            JSONArray mapArray = response.getJSONArray("Items").getJSONObject(0)
+                                    .getJSONArray("Elements").getJSONObject(elementsArray.length()-1)
+                                    .getJSONArray
+                                            ("Map");
 
                             // clear optionsArray
                             optionsArray.clear();
@@ -349,15 +362,16 @@ public class SurveyQuestion extends WearableActivity {
     }
 
 
-// make request for token
-    public void getToken(final String totalToken){
+    // make request for token
+    public void getToken(String tokenURL){
 
 
         // Make Request
         final RequestQueue requestQueue = Volley.newRequestQueue(this);
 
         final JsonObjectRequest objectRequest;
-        String tokenURL = "https://www.assessmentcenter.net/ac_api/2014-01/Assessments/C1E44752-BCBD-4130-A307-67F6758F3891.json";
+        /*String tokenURL = "https://www.assessmentcenter" +
+                ".net/ac_api/2014-01/Assessments/C1E44752-BCBD-4130-A307-67F6758F3891.json";*/
 
 
 
@@ -447,12 +461,73 @@ public class SurveyQuestion extends WearableActivity {
 
     }
 
-    public void callExitPage(String dateFinished){
-        Intent intent = new Intent(this, ExitPage.class);
-        intent.putExtra("Date", dateFinished);
+    public void callExitPage(final String dateFinished, String itoken){
+
         tts.stop();
         tts.shutdown();
-        startActivity(intent);
+
+        // Make Request
+        final RequestQueue requestQueue = Volley.newRequestQueue(this);
+
+        final JsonObjectRequest objectRequest;
+        String tokenURL = "https://www.assessmentcenter" +
+                ".net/ac_api/2014-01/Results/" + itoken + ".json";
+
+
+
+        objectRequest = new JsonObjectRequest(Request.Method.POST, tokenURL, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.e("Rest Response", response.toString());
+
+                        try {
+                            JSONObject results = response.getJSONObject("Name");
+                            Intent intent = new Intent(SurveyQuestion.this, ExitPage.class);
+                            intent.putExtra("Date", dateFinished);
+                            startActivity(intent);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Intent intent = new Intent(SurveyQuestion.this, ExitPage.class);
+                            intent.putExtra("Date", dateFinished+" Could not get results.");
+                            startActivity(intent);
+                        }
+
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Rest Response Error", error.toString());
+            }
+        }
+        ) {
+            //This is for Headers If You Needed
+            @Override
+            public Map<String, String> getHeaders() {
+                byte[] data = null;
+                try {
+                    data = totalToken.getBytes("UTF-8");
+                } catch (UnsupportedEncodingException e1) {
+                    e1.printStackTrace();
+                }
+                //String base64Token = Base64.encodeToString(dataToken, Base64.DEFAULT);
+                String base64 = Base64.encodeToString(data, Base64.NO_WRAP);
+                //              System.out.print(base64);
+
+
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", "application/x-www-form-urlencoded");
+                params.put("Authorization", "Basic " + base64);
+                return params;
+            }
+
+
+        };
+
+
+        requestQueue.add(objectRequest);
     }
 
     /*public void getVoiceInput(View view)
