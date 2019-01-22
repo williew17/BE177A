@@ -75,7 +75,15 @@ module.exports = {
     
     
     
-    administerTest: function () {
+    administerTest: function (AssessmentToken) {
+      var res = request('GET', startURL + "Participants/" + AssessmentToken + ".json", {
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
+        },
+      });
+
+      var info = JSON.parse(res.getBody('utf8'))
+      console.log(info.Items[0].Elements);
       return "administer" ;
     },
     
@@ -84,7 +92,7 @@ module.exports = {
         headers: {
           'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
         },
-      })
+      });
          
           try {
             var info = JSON.parse(res.getBody('utf8'));

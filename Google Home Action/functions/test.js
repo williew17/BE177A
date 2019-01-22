@@ -16,8 +16,8 @@ server.listen(port, hostname, () => {
   var results = api.getFormID()
   //console.log(results.Form[25])
   //console.log(api.getForm('037D7B69-FCB2-482E-A1CE-9A4D017D24AD'))
-  console.log(api.registerTest('037D7B69-FCB2-482E-A1CE-9A4D017D24AD'));
-  
+  //console.log(api.registerTest('037D7B69-FCB2-482E-A1CE-9A4D017D24AD'));
+  console.log(api.administerTest('28683d39-da5d-49a7-b303-2665608761ee'));
   
   
   
