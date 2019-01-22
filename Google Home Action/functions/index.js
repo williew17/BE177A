@@ -38,7 +38,7 @@ var QC_Pairs = [
 var Questions = api.getForm("037D7B69-FCB2-482E-A1CE-9A4D017D24AD")
 
 
-/*
+
 df.intent('Patient Survey', (conv) => {
   conv.ask(Questions[0]);
   conv.contexts.set('survey', 3, {index: 0});
@@ -168,7 +168,7 @@ df.intent('Repeat', (conv) => {
    conv.ask(Questions[questionNum] + Choices[QC_Pairs[questionNum]]); 
    conv.contexts.set('survey', 3, {index: questionNum});
 });
-*/
+
 /*
 df.intent('Response', (conv, {num, phrase}) => {
     const s = conv.contexts.get('survey');
