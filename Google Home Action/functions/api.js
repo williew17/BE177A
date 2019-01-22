@@ -13,21 +13,24 @@ module.exports = {
 				'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64'),
 			  },
 			});
-		console.log('hello')
 		return JSON.parse(res.getBody('utf8'));
 		},
     
     getForm: function (formID) {
-      var options = {
-          url: startURL + 'Forms/' + formID + '.json',
-          headers: {
-            'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
-          }
-        };
-         
-        function callback(error, response, body) {
-          if (!error && response.statusCode == 200) {
-            var items = JSON.parse(body).Items;
+      var res = request('GET', startURL + 'Forms/' + formID + '.json', {
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
+        },
+      });
+
+          //if (!error && response.statusCode == 200) {
+            try {
+              var info = JSON.parse(res.getBody('utf8'))
+            }
+            catch(err) {
+              console.log("Error: Cannot retrieve Form Info.")
+            }
+            var items = info.Items
             // console.log(info); //JSON format
             var all_questions = []
             for (var i = 0; i < items.length; i++){
@@ -47,36 +50,27 @@ module.exports = {
               }
               all_questions.push(_div)
             }
-            console.log(all_questions)
-          }
-          else {
+            return all_questions
+          //}
+          /*else {
               console.log("Error: Cannot retrieve Form Info.")
-          }
-          
-        }
-         
-        request(options, callback);
+          }*/
     },
     
     registerTest: function (formID) {
-      var options = {
-          url: startURL + 'Assessments/' + formID +'.json',
-          headers: {
-            'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
-          }
-        };
-        function callback(error, response, body) {
-          if (!error && response.statusCode == 200) {
-            var info = JSON.parse(body);
-          console.log(info); //JSON format where the {OID:_____, Name: ______}
-          }
-          else {
-              console.log("Error: Cannot get formID's")
-          }
-        }
-         
-        request(options, callback);
+      var res = request('GET', startURL + 'Assessments/' + formID +'.json', {
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
+        },
+      });
 
+          try {
+            var info = JSON.parse(res.getBody('utf8'));
+          }
+          catch(err) {
+            console.log("Error: Cannot get formID's")
+          }
+          return info;
     },
     
     
@@ -86,23 +80,18 @@ module.exports = {
     },
     
     testResults: function (AssessmentToken) {
-      var options = {
-          url: startURL + 'Results/' + AssessmentToken +'.json',
-          headers: {
-            'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
-          }
-        };
+      var res = request('GET', startURL + 'Results/' + AssessmentToken +'.json', {
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
+        },
+      })
          
-        function callback(error, response, body) {
-          if (!error && response.statusCode == 200) {
-            var info = JSON.parse(body);
-            return info;
+          try {
+            var info = JSON.parse(res.getBody('utf8'));
           }
-          else {
+          catch(err) {
               console.log("Error: Cannot get formID's")
           }
-        }
-         
-        return request(options, callback);
+          return info;
     },
     };
