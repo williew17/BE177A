@@ -79,6 +79,7 @@ module.exports = {
       for (var n = 0; n < map.length; n++) {
         maplist += "(" + map[n].Value + "):"+  map[n].Description + "    " ;
       }
+	  return maplist;
     },
 
     mapDict: function (element) {
@@ -87,6 +88,7 @@ module.exports = {
       for (var n = 0; n < map.length; n++) {
         mapdict.push({'description':map[n].Description, 'number':map[n].Value, 'OID':map[n].ItemResponseOID})
       }
+	  return mapdict;
     },
     
     administerTest: function (first, AssessmentToken, response) {

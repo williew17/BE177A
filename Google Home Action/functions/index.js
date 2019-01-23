@@ -15,27 +15,35 @@ var formID = "037D7B69-FCB2-482E-A1CE-9A4D017D24AD";
 df.intent('Patient Survey', (conv) => {
     assessmentToken = api.registerTest(formID).OID;
 	var firstQuestion = api.administerTest(assessmentToken);
-	conv.ask( firstquestion[0].Description + firsquestion[1].Description + )
-
+	conv.ask( firstQuestion[0].Description + ' ' + firstQuestion[1].Description + ' ' + api.mapHelper(firstQuestion))
+	conv.contexts.set('assessmentToken', 3, {token: assessmentToken}); 
+	conv.contexts.set('choices', 3, api.mapdict(firstQuestion));
 })
 
 df.intent('Response', (conv, {num, phrase}) => {
     const at = conv.contexts.get('assessmentToken');
-    const phrases = conv.contexts.get('phrases');
-    const numbers = conv.contexts.get('numbers');
+    const token = at.parameters.token;
+    const choices = conv.contexts.get('choices').parameters.choices;
+    
+    var OID = '';
     
     if(phrase != undefined){ //convert to number
-        for(p in phrases) {
-            if (p.description == phrase){
-                num = p.number;
+        for(c in choices) {
+            if (c.description == phrase){
+                num = c.number;
+                OID = c.OID;
             }
         }
     }
-    if(num != undefined){
-        response = ; // get ItemOID
-        api.administerTest(at, response, num)
+    else if(num != undefined){ //getItemResponseOID
+        for(c in choices) {
+            if (c.number == num){
+                OID = c.OID;
+            }
+        }
+        api.administerTest(at, OID, num)
         .then(function (data) { 
-            data.Items.Elements[2].Map; //put this into numbers and phrases
+            data.Items.Elements[2].Map; //put this into the choices
         })
     }
     else{
