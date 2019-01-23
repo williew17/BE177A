@@ -73,7 +73,12 @@ module.exports = {
           return info;
     },
     
-    
+    mapHelper: function (element) {
+      var map = element[2].Map
+      for (var n = 0; n < map.length; n++) {
+        map += "(" + map[n].Value + "):"+  map[n].Description + "    " ;
+      }
+    },
     
     administerTest: function (first, AssessmentToken, response) {
       
@@ -86,6 +91,7 @@ module.exports = {
 		  },
 		});
 		var info = JSON.parse(res.getBody('utf8'))
+    console.log(info.Items[0].Elements[2])
 		 return info.Items[0].Elements
 		 }
 		 catch(err) {
