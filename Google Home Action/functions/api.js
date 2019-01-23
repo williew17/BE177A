@@ -74,9 +74,18 @@ module.exports = {
     },
     
     mapHelper: function (element) {
+      var maplist = ''
       var map = element[2].Map
       for (var n = 0; n < map.length; n++) {
-        map += "(" + map[n].Value + "):"+  map[n].Description + "    " ;
+        maplist += "(" + map[n].Value + "):"+  map[n].Description + "    " ;
+      }
+    },
+
+    mapDict: function (element) {
+      var mapdict = []
+      var map = element[2].Map
+      for (var n = 0; n < map.length; n++) {
+        mapdict.push({'description':map[n].Description, 'number':map[n].Value, 'OID':map[n].ItemResponseOID})
       }
     },
     
