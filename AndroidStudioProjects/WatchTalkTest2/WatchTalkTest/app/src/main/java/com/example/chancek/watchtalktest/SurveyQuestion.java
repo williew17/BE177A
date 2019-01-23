@@ -2,6 +2,7 @@ package com.example.chancek.watchtalktest;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +48,14 @@ public class SurveyQuestion extends WearableActivity {
 
     // Global variables
     int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 10;
+
+    // PROMIS Pain interference non-CAT
+    //String testOID = "C1E44752-BCBD-4130-A307-67F6758F3891";
+
+    // ASCQ Me Social Functioning impact CAT
+    String testOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F";
+
+    String filename = "WatchTalkTest_Results.txt";
 
     TextToSpeech tts;
     String gQuestion;
@@ -153,13 +163,6 @@ public class SurveyQuestion extends WearableActivity {
 
 
         // Generate participant token
-
-        // PROMIS Pain interference non-CAT
-        //String testOID = "C1E44752-BCBD-4130-A307-67F6758F3891";
-
-        // ASCQ Me Social Functioning impact CAT
-        String testOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F";
-
         String tokenURL = "https://www.assessmentcenter.net/ac_api/2014-01/Assessments/" +
                 testOID + ".json";
         getToken(tokenURL);
@@ -483,18 +486,27 @@ public class SurveyQuestion extends WearableActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.e("Rest Response", response.toString());
+                        Log.e("Results Text = ", response.toString());
+
+                        String fileString;
+                        FileOutputStream outputStream;
 
                         try {
-                            JSONObject results = response.getJSONObject("Name");
+                            fileString = response.toString();
+                            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                            outputStream.write(fileString.getBytes());
+                            outputStream.close();
+
                             Intent intent = new Intent(SurveyQuestion.this, ExitPage.class);
-                            intent.putExtra("Date", dateFinished + "Results received.");
+                            intent.putExtra("Date", dateFinished + " Results received.");
+                            intent.putExtra("Filename", filename);
                             startActivity(intent);
 
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                             Intent intent = new Intent(SurveyQuestion.this, ExitPage.class);
                             intent.putExtra("Date", dateFinished +" Could not get results.");
+                            intent.putExtra("Filename", "");
                             startActivity(intent);
                         }
 

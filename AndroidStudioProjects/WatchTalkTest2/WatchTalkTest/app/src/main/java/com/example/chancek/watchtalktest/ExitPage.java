@@ -28,8 +28,36 @@ public class ExitPage extends WearableActivity {
 
         Bundle extras = getIntent().getExtras();
         String dateFinished = extras.getString("Date");
+        String filename = extras.getString("Filename");
 
-        textExit.setText("Your survey is complete:" + dateFinished);
+        FileInputStream in;
+        String fileString = "";
+
+        // filename == "" if the file writer threw an exception in SurveyQuestion
+        // If the filename is valid, read the file and display results.
+        if (!filename.equals("")) {
+            try {
+                in = openFileInput(filename);
+                InputStreamReader inputStreamReader = new InputStreamReader(in);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                StringBuilder sb = new StringBuilder();
+                String line;
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line);
+                }
+                in.close();
+
+                fileString = sb.toString();
+            } catch (IOException e) {
+                e.printStackTrace();
+                fileString = "Exception thrown";
+            }
+        }
+
+        String totalText = "Your survey is complete:" + dateFinished + "\n" + fileString;
+
+        textExit.setText(totalText);
 
 
     }
