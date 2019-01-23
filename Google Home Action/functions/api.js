@@ -91,7 +91,6 @@ module.exports = {
 		  },
 		});
 		var info = JSON.parse(res.getBody('utf8'))
-    console.log(info.Items[0].Elements[2])
 		 return info.Items[0].Elements
 		 }
 		 catch(err) {
