@@ -75,16 +75,41 @@ module.exports = {
     
     
     
-    administerTest: function (AssessmentToken) {
-      var res = request('GET', startURL + "Participants/" + AssessmentToken + ".json", {
+    administerTest: function (first, AssessmentToken, response) {
+      
+	  if (first) //if it is the first question
+	  {
+		 try {
+		var res = request('GET', startURL + "Participants/" + AssessmentToken + ".json", {
         headers: {
           'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
-        },
-      });
-
-      var info = JSON.parse(res.getBody('utf8'))
-      console.log(info.Items[0].Elements);
-      return "administer" ;
+		  },
+		});
+		var info = JSON.parse(res.getBody('utf8'))
+		 return info.Items[0].Elements}
+		 catch(err) {
+            console.log("Error retrieving next question")
+		 }
+	  }
+	  else
+	  {
+		try {
+		var res = request('GET', startURL + "Participants/" + AssessmentToken + ".json" + '?ItemResponseOID=' + response.id + '&Response=' + response.value, {
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
+		  },
+		});
+		var info = JSON.parse(res.getBody('utf8'))
+		if (info.DateFinshed != '')//this means we are at the end
+		{
+			return "reached end"
+		}
+		else
+			return info.Items[0].Elements
+		}
+		catch (err) {
+            console.log("Error getting next question.")
+	  }
     },
     
     testResults: function (AssessmentToken) {
