@@ -155,10 +155,10 @@ public class SurveyQuestion extends WearableActivity {
         // Generate participant token
 
         // PROMIS Pain interference non-CAT
-        String testOID = "C1E44752-BCBD-4130-A307-67F6758F3891";
+        //String testOID = "C1E44752-BCBD-4130-A307-67F6758F3891";
 
         // ASCQ Me Social Functioning impact CAT
-        //String testOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F";
+        String testOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F";
 
         String tokenURL = "https://www.assessmentcenter.net/ac_api/2014-01/Assessments/" +
                 testOID + ".json";
@@ -291,8 +291,9 @@ public class SurveyQuestion extends WearableActivity {
                                     .getJSONArray
                                             ("Map");
 
-                            // clear optionsArray
+                            // clear optionsArray and responseIDArray
                             optionsArray.clear();
+                            responseIDArray.clear();
 
 
                             for (int i = 0; i < mapArray.length(); i++) {
@@ -445,8 +446,10 @@ public class SurveyQuestion extends WearableActivity {
         int index = spinnerOptions.getSelectedItemPosition();
         String responseID = responseIDArray.get(index).toString();
         String valueID = Integer.toString(index + 1);
-        getQuestions(gToken,responseID,valueID);
 
+        Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
+
+        getQuestions(gToken,responseID,valueID);
     }
 
     // submit via code
@@ -457,8 +460,9 @@ public class SurveyQuestion extends WearableActivity {
         String responseID = responseIDArray.get(index).toString();
         String valueID = Integer.toString(index + 1);
 
-        getQuestions(gToken,responseID,valueID);
+        Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
 
+        getQuestions(gToken,responseID,valueID);
     }
 
     public void callExitPage(final String dateFinished, String itoken){
@@ -484,13 +488,13 @@ public class SurveyQuestion extends WearableActivity {
                         try {
                             JSONObject results = response.getJSONObject("Name");
                             Intent intent = new Intent(SurveyQuestion.this, ExitPage.class);
-                            intent.putExtra("Date", dateFinished);
+                            intent.putExtra("Date", dateFinished + "Results received.");
                             startActivity(intent);
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Intent intent = new Intent(SurveyQuestion.this, ExitPage.class);
-                            intent.putExtra("Date", dateFinished+" Could not get results.");
+                            intent.putExtra("Date", dateFinished +" Could not get results.");
                             startActivity(intent);
                         }
 
