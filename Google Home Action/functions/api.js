@@ -86,7 +86,8 @@ module.exports = {
 		  },
 		});
 		var info = JSON.parse(res.getBody('utf8'))
-		 return info.Items[0].Elements}
+		 return info.Items[0].Elements
+		 }
 		 catch(err) {
             console.log("Error retrieving next question")
 		 }
@@ -104,13 +105,15 @@ module.exports = {
 		{
 			return "reached end"
 		}
-		else
+		else {
 			return info.Items[0].Elements
+		}
 		}
 		catch (err) {
             console.log("Error getting next question.")
-	  }
-    },
+		}
+		}
+	},
     
     testResults: function (AssessmentToken) {
       var res = request('GET', startURL + 'Results/' + AssessmentToken +'.json', {
