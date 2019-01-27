@@ -8,16 +8,14 @@ const df = dialogflow({debug: true});
 //importing file api.js as api
 //use functions in api.js by doing api.<func1>()
 var api = require('./api');
-var formID = "037D7B69-FCB2-482E-A1CE-9A4D017D24AD";
-
+var formID = '037D7B69-FCB2-482E-A1CE-9A4D017D24AD';
 //var Questions = api.getForm("037D7B69-FCB2-482E-A1CE-9A4D017D24AD")
-
 df.intent('Patient Survey', (conv) => {
-    assessmentToken = api.registerTest(formID).OID;
-	var firstQuestion = api.administerTest(assessmentToken);
-	conv.ask( firstQuestion[0].Description + ' ' + firstQuestion[1].Description + ' ' + api.mapHelper(firstQuestion))
+    var assessmentToken = api.registerTest(formID).OID;
+    var firstQuestion = api.administerTest(assessmentToken);
+    conv.ask(firstQuestion[0]);
 	conv.contexts.set('assessmentToken', 3, {token: assessmentToken}); 
-	conv.contexts.set('choices', 3, api.mapdict(firstQuestion));
+	conv.contexts.set('choices', 3, firstQuestion[1]);
 })
 
 df.intent('Response', (conv, {num, phrase}) => {

@@ -1,4 +1,3 @@
-var request = require('request');
 var request = require('sync-request');
 const textID = "0ED7B052-FDB2-4EDF-9B4B-E732F69DDF7A";
 const textToken = "3171FF33-83C5-4221-9BB0-051DC747AEB9";
@@ -73,7 +72,7 @@ module.exports = {
           return info;
     },
     
-    mapHelper: function (element) {
+    /*mapHelper: function (element) {
       var maplist = ''
       var map = element[2].Map
       for (var n = 0; n < map.length; n++) {
@@ -89,7 +88,7 @@ module.exports = {
         mapdict.push({'description':map[n].Description, 'number':map[n].Value, 'OID':map[n].ItemResponseOID})
       }
 	  return mapdict;
-    },
+    },*/
     
     administerTest: function (first, AssessmentToken, response) {
       
@@ -101,8 +100,21 @@ module.exports = {
           'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
 		  },
 		});
+
 		var info = JSON.parse(res.getBody('utf8'))
-		 return info.Items[0].Elements
+    var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description
+    
+    var choices = ""
+    var map = info.Items[0].Elements[2].Map
+    for (var n = 0; n < map.length; n++) {
+      choices += "(" + map[n].Value + "):"+  map[n].Description + " " ;
+    }
+
+    var mapdict = []
+    for (var n = 0; n < map.length; n++) {
+      mapdict.push({'description':map[n].Description, 'number':map[n].Value, 'OID':map[n].ItemResponseOID})
+    }
+    return [String(question + ' ' + choices), mapdict];
 		 }
 		 catch(err) {
             console.log("Error retrieving next question")
@@ -122,7 +134,19 @@ module.exports = {
 			return "reached end"
 		}
 		else {
-			return info.Items[0].Elements
+      var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description
+    
+    var choices = ''
+    var map = info.Items[0].Elements[2].Map
+    for (var n = 0; n < map.length; n++) {
+      choices += "(" + map[n].Value + "):"+  map[n].Description + " " ;
+    }
+
+    var mapdict = []
+    for (var n = 0; n < map.length; n++) {
+      mapdict.push({'description':map[n].Description, 'number':map[n].Value, 'OID':map[n].ItemResponseOID})
+    }
+    return [String(question + ' ' + choices), mapdict];
 		}
 		}
 		catch (err) {
