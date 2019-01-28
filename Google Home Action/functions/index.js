@@ -15,13 +15,13 @@ df.intent('Patient Survey', (conv) => {
     var firstQuestion = api.administerTest(true, assessmentToken, []);
     conv.ask(firstQuestion[0])
 	conv.contexts.set('assessmentToken', 3, {token: assessmentToken}); 
-	//conv.contexts.set('choices', 3, firstQuestion[1]);
+	conv.contexts.set('choices', 3, JSON.stringify(firstQuestion[1]));
 })
 
 df.intent('Response', (conv, {num, phrase}) => {
     const at = conv.contexts.get('assessmentToken');
     const token = at.parameters.token;
-    const choices = conv.contexts.get('choices').parameters.choices;
+    const choices = JSON.parse(conv.contexts.get('choices').parameters.choices);
     
     var OID = '';
     

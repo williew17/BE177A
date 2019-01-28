@@ -16,8 +16,10 @@ server.listen(port, hostname, () => {
   var api = require('./api');
   var formID = '037D7B69-FCB2-482E-A1CE-9A4D017D24AD';
   var assessmentToken = api.registerTest(formID).OID;
+  var firstQuestion = api.administerTest(true, assessmentToken, []);
+  //conv.ask(firstQuestion[0])
   console.log(assessmentToken);
-  var firstQuestion = api.administerTest(assessmentToken);
+  console.log(firstQuestion[1]);
   });
 
   
