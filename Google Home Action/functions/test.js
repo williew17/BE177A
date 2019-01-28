@@ -13,14 +13,11 @@ const server = http.createServer((req, res) => {
 
 server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
-  var results = api.getFormID()
-  //console.log(results.Form[25])
-  //console.log(api.getForm('037D7B69-FCB2-482E-A1CE-9A4D017D24AD'))
-  var assessmentToken = api.registerTest('037D7B69-FCB2-482E-A1CE-9A4D017D24AD').OID;
-  console.log(api.administerTest(true, assessmentToken, []));
-  
-  
-  
+  var api = require('./api');
+  var formID = '037D7B69-FCB2-482E-A1CE-9A4D017D24AD';
+  var assessmentToken = api.registerTest(formID).OID;
+  console.log(assessmentToken);
+  var firstQuestion = api.administerTest(assessmentToken);
   });
 
   

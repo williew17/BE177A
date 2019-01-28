@@ -100,8 +100,9 @@ module.exports = {
           'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
 		  },
 		});
-
+		console.log(res);
 		var info = JSON.parse(res.getBody('utf8'))
+		console.log(info)
     var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description
     
     var choices = ""
