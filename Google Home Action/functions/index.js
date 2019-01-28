@@ -12,10 +12,10 @@ var formID = '037D7B69-FCB2-482E-A1CE-9A4D017D24AD';
 //var Questions = api.getForm("037D7B69-FCB2-482E-A1CE-9A4D017D24AD")
 df.intent('Patient Survey', (conv) => {
     var assessmentToken = api.registerTest(formID).OID;
-    var firstQuestion = api.administerTest(assessmentToken);
-    conv.ask(firstQuestion[0]);
-	conv.contexts.set('assessmentToken', 3, {token: assessmentToken}); 
-	conv.contexts.set('choices', 3, firstQuestion[1]);
+    var firstQuestion = api.administerTest(true, assessmentToken, []);
+    conv.ask(firstQuestion[0])
+	//conv.contexts.set('assessmentToken', 3, {token: assessmentToken}); 
+	//conv.contexts.set('choices', 3, firstQuestion[1]);
 })
 
 df.intent('Response', (conv, {num, phrase}) => {
