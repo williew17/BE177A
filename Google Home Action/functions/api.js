@@ -132,7 +132,7 @@ module.exports = {
                 var info = JSON.parse(res.getBody('utf8'))
                 if (info.DateFinished != '')//this means we are at the end
                 {
-                    return info.DateFinished + "the date";
+                    return [info.DateFinished];
                 }
                 else {
                     var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description

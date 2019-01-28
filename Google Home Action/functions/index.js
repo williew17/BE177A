@@ -14,15 +14,14 @@ df.intent('Patient Survey', (conv) => {
     var assessmentToken = api.registerTest(formID).OID;
     var firstQuestion = api.administerTest(true, assessmentToken, []);
     conv.ask(firstQuestion[0]);
-	conv.contexts.set('assessmenttoken', 5, {token: assessmentToken});
-	conv.contexts.set('choices', 5, {"choices": firstQuestion[1]});
+	conv.contexts.set('assessmenttoken', 3, {"token": assessmentToken});
+    conv.contexts.set('question', 3, {"question": firstQuestion[0]});
+	conv.contexts.set('choices', 3, {"choices": firstQuestion[1]});
 })
 
 df.intent('Response', (conv, {num, phrase}) => {
-    const context1 = conv.contexts.get('assessmenttoken');
-    const token = context1.parameters.token;
-    const context2 = conv.contexts.get('choices');
-    const choices = context2.parameters.choices;
+    const token = conv.contexts.get('assessmenttoken').parameters.token;
+    const choices = conv.contexts.get('choices').parameters.choices;
     
     var lowercasePhrase = '';
     var OID = '';
@@ -50,11 +49,17 @@ df.intent('Response', (conv, {num, phrase}) => {
         return;
     }
     var output = api.administerTest(false, token, {"id": OID, "value": value});
+    if(output.length == 1){
+        conv.ask("You have finished the assessment.");
+    }
     conv.ask(output[0]);
-    conv.contexts.set('choices', 5, {"choices": output[1]});
+    conv.contexts.set('assessmenttoken', 3, {"token": token});
+    conv.contexts.set('question', 3, {"question": output[0]});
+    conv.contexts.set('choices', 3, {"choices": output[1]});
 })
 
 df.intent('Repeat', (conv) => {
+    conv.ask(conv.contexts.get('question').parameters.question);
 })
 
 exports.fulfillment = functions.https.onRequest(df);
