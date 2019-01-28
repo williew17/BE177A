@@ -92,67 +92,67 @@ module.exports = {
     
     administerTest: function (first, AssessmentToken, response) {
       
-	  if (first) //if it is the first question
-	  {
-		 try {
-		var res = request('GET', startURL + "Participants/" + AssessmentToken + ".json", {
-        headers: {
-          'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
-		  },
-		});
-		console.log(res);
-		var info = JSON.parse(res.getBody('utf8'))
-		console.log(info)
-    var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description
-    
-    var choices = ""
-    var map = info.Items[0].Elements[2].Map
-    for (var n = 0; n < map.length; n++) {
-      choices += "(" + map[n].Value + "):"+  map[n].Description + " " ;
-    }
+        if (first) //if it is the first question
+        {
+            try {
+                var res = request('GET', startURL + "Participants/" + AssessmentToken + ".json", {
+                headers: {
+                  'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
+                  },
+                });
+                console.log(res);
+                var info = JSON.parse(res.getBody('utf8'))
+                console.log(info);
+                var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description
+            
+                var choices = ""
+                var map = info.Items[0].Elements[2].Map
+                for (var n = 0; n < map.length; n++) {
+                    choices += "(" + map[n].Value + "):"+  map[n].Description + " " ;
+                }
 
-    var mapdict = []
-    for (var n = 0; n < map.length; n++) {
-      mapdict.push({'description':map[n].Description, 'number':map[n].Value, 'OID':map[n].ItemResponseOID})
-    }
-    return [String(question + ' ' + choices), mapdict];
-		 }
-		 catch(err) {
-            console.log("Error retrieving next question")
-		 }
-	  }
-	  else
-	  {
-		try {
-		var res = request('GET', startURL + "Participants/" + AssessmentToken + ".json" + '?ItemResponseOID=' + response.id + '&Response=' + response.value, {
-        headers: {
-          'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
-		  },
-		});
-		var info = JSON.parse(res.getBody('utf8'))
-		if (info.DateFinshed != '')//this means we are at the end
-		{
-			return "reached end"
-		}
-		else {
-      var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description
-    
-    var choices = ''
-    var map = info.Items[0].Elements[2].Map
-    for (var n = 0; n < map.length; n++) {
-      choices += "(" + map[n].Value + "):"+  map[n].Description + " " ;
-    }
+                var choiceArray = [];
+                for (var n = 0; n < map.length; n++) {
+                    choiceArray.push({"value": map[n].Value, "description": map[n].Description.toLowerCase(), "OID": map[n].ItemResponseOID});
+                }
+                return [String(question + ' ' + choices), choiceArray];
+            }
+            catch(err) {
+                console.log("Error retrieving next question")
+            }
+        }
+        else
+        {
+            try {
+                var res = request('GET', startURL + "Participants/" + AssessmentToken + ".json" + '?ItemResponseOID=' + response.id + '&Response=' + response.value, {
+                headers: {
+                  'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
+                  },
+                });
+                var info = JSON.parse(res.getBody('utf8'))
+                if (info.DateFinished != '')//this means we are at the end
+                {
+                    return info.DateFinished + "the date";
+                }
+                else {
+                    var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description
+        
+                    var choiceArray = [];
+                    var map = info.Items[0].Elements[2].Map
+                    for (var n = 0; n < map.length; n++) {
+                      choices += "(" + map[n].Value + "):"+  map[n].Description + " " ;
+                    }
 
-    var mapdict = []
-    for (var n = 0; n < map.length; n++) {
-      mapdict.push({'description':map[n].Description, 'number':map[n].Value, 'OID':map[n].ItemResponseOID})
-    }
-    return [String(question + ' ' + choices), mapdict];
-		}
-		}
-		catch (err) {
-            console.log("Error getting next question.")
-		}
+                    var choice = []
+                    for (var n = 0; n < map.length; n++) {
+                    choiceArray.push({"value": map[n].Value, "description": map[n].Description.toLowerCase(), "OID": map[n].ItemResponseOID});
+                    }
+                    return [String(question + ' ' + choices), choiceArray];
+                }
+            }
+            catch (err) {
+                console.log("Error getting next question.")
+            }
 		}
 	},
     

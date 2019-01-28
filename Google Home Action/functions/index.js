@@ -13,44 +13,48 @@ var formID = '037D7B69-FCB2-482E-A1CE-9A4D017D24AD';
 df.intent('Patient Survey', (conv) => {
     var assessmentToken = api.registerTest(formID).OID;
     var firstQuestion = api.administerTest(true, assessmentToken, []);
-    conv.ask(firstQuestion[0])
-	conv.contexts.set('assessmentToken', 3, {token: assessmentToken}); 
-	conv.contexts.set('choices', 3, JSON.stringify(firstQuestion[1]));
+    conv.ask(firstQuestion[0]);
+	conv.contexts.set('assessmenttoken', 5, {token: assessmentToken});
+	conv.contexts.set('choices', 5, {"choices": firstQuestion[1]});
 })
 
 df.intent('Response', (conv, {num, phrase}) => {
-    const at = conv.contexts.get('assessmentToken');
-    const token = at.parameters.token;
-    const choices = JSON.parse(conv.contexts.get('choices').parameters.choices);
+    const context1 = conv.contexts.get('assessmenttoken');
+    const token = context1.parameters.token;
+    const context2 = conv.contexts.get('choices');
+    const choices = context2.parameters.choices;
     
+    var lowercasePhrase = '';
     var OID = '';
+    var value = 0;
     
-    if(phrase != undefined){ //convert to number
-        for(c in choices) {
-            if (c.description == phrase){
-                num = c.number;
+    if(phrase != ''){ //convert to number
+    lowercasePhrase = phrase.toLowerCase();
+        for(let c of choices) {
+            if (c.description == lowercasePhrase){
+                value = c.value;
                 OID = c.OID;
             }
         }
     }
-    else if(num != undefined){ //getItemResponseOID
-        for(c in choices) {
-            if (c.number == num){
+    else if(num != ''){ //getItemResponseOID
+        for(let c of choices) {
+            if (c.value == num){
+                value = c.value;
                 OID = c.OID;
             }
         }
-        api.administerTest(at, OID, num)
-        .then(function (data) { 
-            data.Items.Elements[2].Map; //put this into the choices
-        })
     }
     else{
         conv.ask("Sorry, we were unable to match your answer to the choices provided. Could you repeat that?");
+        return;
     }
+    var output = api.administerTest(false, token, {"id": OID, "value": value});
+    conv.ask(output[0]);
+    conv.contexts.set('choices', 5, {"choices": output[1]});
 })
 
 df.intent('Repeat', (conv) => {
-    
 })
 
 exports.fulfillment = functions.https.onRequest(df);
