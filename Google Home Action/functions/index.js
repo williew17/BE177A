@@ -14,7 +14,7 @@ df.intent('Patient Survey', (conv) => {
     var assessmentToken = api.registerTest(formID).OID;
     var firstQuestion = api.administerTest(true, assessmentToken, []);
     conv.ask(firstQuestion[0])
-	//conv.contexts.set('assessmentToken', 3, {token: assessmentToken}); 
+	conv.contexts.set('assessmentToken', 3, {token: assessmentToken}); 
 	//conv.contexts.set('choices', 3, firstQuestion[1]);
 })
 
