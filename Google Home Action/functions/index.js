@@ -52,13 +52,14 @@ df.intent('Response', (conv, {num, phrase}) => {
     }
     var output = api.administerTest(false, token, {"id": OID, "value": value});
     if(output.length == 1){
-        //conv.ask("You have finished the assessment.");
+        conv.ask("You have finished the assessment.");
         var results = api.testResults(token);
         var file = new Buffer(results.Name, 'binary');
         var opts = {Body: file, Bucket: "swellhomebucket", Key: "swelltest"};
-        var complete = s3.putObject( opts, function (err) {});
-        conv.ask("upload complete.");
-        return;
+        var complete = new Promise( function(resolve, reject) {
+			s3.putObject( opts, function() {conv.ask("upload complete")});
+		});
+        return complete;
     }
     conv.ask(output[0]);
     conv.contexts.set('assessmenttoken', 3, {"token": token});
