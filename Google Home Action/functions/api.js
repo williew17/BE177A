@@ -103,7 +103,7 @@ module.exports = {
                 console.log(res);
                 var info = JSON.parse(res.getBody('utf8'))
                 console.log(info);
-                var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description
+                var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description;
             
                 var choices = ""
                 var map = info.Items[0].Elements[2].Map
@@ -115,7 +115,7 @@ module.exports = {
                 for (var n = 0; n < map.length; n++) {
                     choiceArray.push({"value": map[n].Value, "description": map[n].Description.toLowerCase(), "OID": map[n].ItemResponseOID});
                 }
-                return [String(question + ' ' + choices), choiceArray];
+                return [question + " " + choices, choiceArray];
             }
             catch(err) {
                 console.log("Error retrieving next question")
@@ -135,7 +135,7 @@ module.exports = {
                     return [info.DateFinished];
                 }
                 else {
-                    var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description
+                    var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description;
         
                     var choiceArray = [];
                     var map = info.Items[0].Elements[2].Map
@@ -147,7 +147,7 @@ module.exports = {
                     for (var n = 0; n < map.length; n++) {
                     choiceArray.push({"value": map[n].Value, "description": map[n].Description.toLowerCase(), "OID": map[n].ItemResponseOID});
                     }
-                    return [String(question + ' ' + choices), choiceArray];
+                    return [question + ' ' + choices, choiceArray];
                 }
             }
             catch (err) {
@@ -171,4 +171,4 @@ module.exports = {
           }
           return info;
     },
-    };
+};
