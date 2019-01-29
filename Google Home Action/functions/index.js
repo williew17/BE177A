@@ -53,6 +53,7 @@ df.intent('Response', (conv, {num, phrase}) => {
     var output = api.administerTest(false, token, {"id": OID, "value": value});
     if(output.length == 1){
         conv.ask("You have finished the assessment.");
+        var results = api.testResults(token)
     }
     conv.ask(output[0]);
     conv.contexts.set('assessmenttoken', 3, {"token": token});
