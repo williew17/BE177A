@@ -137,13 +137,13 @@ module.exports = {
                 else {
                     var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description;
         
-                    var choiceArray = [];
+                    var choices = "";
                     var map = info.Items[0].Elements[2].Map
                     for (var n = 0; n < map.length; n++) {
                       choices += "(" + map[n].Value + "):"+  map[n].Description + " " ;
                     }
 
-                    var choice = []
+                    var choiceArray = []
                     for (var n = 0; n < map.length; n++) {
                     choiceArray.push({"value": map[n].Value, "description": map[n].Description.toLowerCase(), "OID": map[n].ItemResponseOID});
                     }
