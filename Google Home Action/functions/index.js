@@ -2,7 +2,9 @@
 
 const {dialogflow,Permission,Suggestions} = require('actions-on-google');
 const functions = require('firebase-functions');
-
+var AWS = require('aws-sdk');
+AWS.config.loadFromPath('./config.json');
+const s3 = new AWS.S3();
 const df = dialogflow({debug: true});
 
 //importing file api.js as api
