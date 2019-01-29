@@ -8,8 +8,8 @@ const df = dialogflow({debug: true});
 //importing file api.js as api
 //use functions in api.js by doing api.<func1>()
 var api = require('./api');
-var formID = '037D7B69-FCB2-482E-A1CE-9A4D017D24AD';
-//var Questions = api.getForm("037D7B69-FCB2-482E-A1CE-9A4D017D24AD")
+var formID = '80C5D4A3-FC1F-4C1B-B07E-10B796CF8105'; // PROMIS Bank v2.0 - Physical Function
+
 df.intent('Patient Survey', (conv) => {
     var assessmentToken = api.registerTest(formID).OID;
     var firstQuestion = api.administerTest(true, assessmentToken, []);
