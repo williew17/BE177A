@@ -11,7 +11,13 @@
   },
   "dependencies": {
     "actions-on-google": "^2.0.0",
+    "aws-sdk": "^2.395.0",
+    "express": "^4.16.4",
     "firebase-admin": "^5.12.0",
-    "firebase-functions": "^2.1.0"
+    "firebase-functions": "^2.1.0",
+    "jQuery": "^1.7.4",
+    "jquery": "^3.3.1",
+    "request": "^2.88.0",
+    "sync-request": "^6.0.0"
   }
 }
