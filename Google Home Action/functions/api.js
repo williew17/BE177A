@@ -100,16 +100,19 @@ module.exports = {
                   'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64')
                   },
                 });
-                console.log(res);
                 var info = JSON.parse(res.getBody('utf8'))
-                console.log(info);
-                var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description;
+
+                var elems = info.Items[0].Elements
+                var question = ""
+                for (var n = 0; n < (elems.length - 1); n++)
+                  question += (elems[n].Description + ' ');
             
                 var choices = ""
-                var map = info.Items[0].Elements[2].Map
+                var map = info.Items[0].Elements[elems.length - 1].Map
                 for (var n = 0; n < map.length; n++) {
                     choices += "(" + map[n].Value + "):"+  map[n].Description + " " ;
                 }
+                console.log(choices)
 
                 var choiceArray = [];
                 for (var n = 0; n < map.length; n++) {
@@ -135,10 +138,13 @@ module.exports = {
                     return [info.DateFinished];
                 }
                 else {
-                    var question = info.Items[0].Elements[0].Description + ' ' + info.Items[0].Elements[1].Description;
+                    var elems = info.Items[0].Elements
+                    var question = ""
+                    for (var n = 0; n < (elems.length - 1); n++)
+                      question += (elems[n].Description + ' ');
         
                     var choices = "";
-                    var map = info.Items[0].Elements[2].Map
+                    var map = info.Items[0].Elements[elems.length - 1].Map
                     for (var n = 0; n < map.length; n++) {
                       choices += "(" + map[n].Value + "):"+  map[n].Description + " " ;
                     }
