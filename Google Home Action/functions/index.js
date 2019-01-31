@@ -57,7 +57,7 @@ df.intent('Response', (conv, {num, phrase}) => {
         if(output.length == 1) {
             conv.ask("You have finished the assessment.");
             return api.testResults(token).then((results) => {
-                var file = new Buffer(results.Name, 'binary');
+                var file = new Buffer("test_name" + JSON.stringify(results), 'binary');
                 var opts = {Body: file, Bucket: "swellhomebucket", Key: "swelltest"};
                 var complete = new Promise( function(resolve, reject) {
                     s3.putObject( opts, function() {conv.ask("upload complete")});
