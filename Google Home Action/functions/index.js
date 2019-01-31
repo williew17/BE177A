@@ -56,13 +56,15 @@ df.intent('Response', (conv, {num, phrase}) => {
     return api.administerTest(token, false, {"id": OID, "value": value}).then((output) => {
         if(output.length == 1) {
             conv.ask("You have finished the assessment.");
-            var results = api.testResults(token);
-            var file = new Buffer(results.Name, 'binary');
-            var opts = {Body: file, Bucket: "swellhomebucket", Key: "swelltest"};
-            var complete = new Promise( function(resolve, reject) {
-                s3.putObject( opts, function() {conv.ask("upload complete")});
+            return api.testResults(token).then((results) => {
+                var file = new Buffer(results.Name, 'binary');
+                var opts = {Body: file, Bucket: "swellhomebucket", Key: "swelltest"};
+                var complete = new Promise( function(resolve, reject) {
+                    s3.putObject( opts, function() {conv.ask("upload complete")});
+                });
+                return complete
             });
-            return complete
+            
         }
         conv.ask(output[0]);
         conv.contexts.set('assessmenttoken', 3, {"token": token});
