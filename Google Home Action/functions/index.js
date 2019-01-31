@@ -13,12 +13,14 @@ var api = require('./api');
 var formID = '80C5D4A3-FC1F-4C1B-B07E-10B796CF8105'; // PROMIS Bank v2.0 - Physical Function
 
 df.intent('Patient Survey', (conv) => {
-    var assessmentToken = api.registerTest(formID).OID;
-    var firstQuestion = api.administerTest(true, assessmentToken, []);
-    conv.ask(firstQuestion[0]);
-	conv.contexts.set('assessmenttoken', 3, {"token": assessmentToken});
-    conv.contexts.set('question', 3, {"question": firstQuestion[0]});
-	conv.contexts.set('choices', 3, {"choices": firstQuestion[1]});
+    return api.registerTest(formID).then((token) => {
+        return api.administerTest(token, true, []).then((firstQuestion) => {
+            conv.ask(firstQuestion[0]);
+            conv.contexts.set('assessmenttoken', 3, {"token": token});
+            conv.contexts.set('question', 3, {"question": firstQuestion[0]});
+            conv.contexts.set('choices', 3, {"choices": firstQuestion[1]});
+        })
+    })
 })
 
 df.intent('Response', (conv, {num, phrase}) => {
@@ -50,21 +52,23 @@ df.intent('Response', (conv, {num, phrase}) => {
         conv.ask("Sorry, we were unable to match your answer to the choices provided. Could you repeat that?");
         return;
     }
-    var output = api.administerTest(false, token, {"id": OID, "value": value});
-    if(output.length == 1){
-        conv.ask("You have finished the assessment.");
-        var results = api.testResults(token);
-        var file = new Buffer(results.Name, 'binary');
-        var opts = {Body: file, Bucket: "swellhomebucket", Key: "swelltest"};
-        var complete = new Promise( function(resolve, reject) {
-			s3.putObject( opts, function() {conv.ask("upload complete")});
-		});
-        return complete;
-    }
-    conv.ask(output[0]);
-    conv.contexts.set('assessmenttoken', 3, {"token": token});
-    conv.contexts.set('question', 3, {"question": output[0]});
-    conv.contexts.set('choices', 3, {"choices": output[1]});
+    
+    return api.administerTest(token, false, {"id": OID, "value": value}).then((output) => {
+        if(output.length == 1) {
+            conv.ask("You have finished the assessment.");
+            var results = api.testResults(token);
+            var file = new Buffer(results.Name, 'binary');
+            var opts = {Body: file, Bucket: "swellhomebucket", Key: "swelltest"};
+            var complete = new Promise( function(resolve, reject) {
+                s3.putObject( opts, function() {conv.ask("upload complete")});
+            });
+            return complete
+        }
+        conv.ask(output[0]);
+        conv.contexts.set('assessmenttoken', 3, {"token": token});
+        conv.contexts.set('question', 3, {"question": output[0]});
+        conv.contexts.set('choices', 3, {"choices": output[1]});
+    });
 })
 
 df.intent('Repeat', (conv) => {
