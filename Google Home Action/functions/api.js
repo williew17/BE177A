@@ -123,8 +123,8 @@ module.exports = {
 
     testResults: function (AssessmentToken) {
       return request({
-        'method': 'GET',
-        'uri': startURL + 'Forms/.json',
+        'method': 'POST',
+        'uri': startURL + 'Results/' + AssessmentToken + '.json',
         'json': true,
         'headers': {'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64'),}
       }).then(function(info){

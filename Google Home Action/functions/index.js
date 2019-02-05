@@ -60,9 +60,11 @@ df.intent('Response', (conv, {num, phrase}) => {
                 var file = new Buffer("test_name" + JSON.stringify(results), 'binary');
                 var opts = {Body: file, Bucket: "swellhomebucket", Key: "swelltest"};
                 var complete = new Promise( function(resolve, reject) {
-                    s3.putObject( opts, function() {conv.ask("upload complete")});
+                    s3.putObject( opts, function() {});
+                    conv.ask("Results uploaded.");
+                    resolve();
                 });
-                return; //call takes too long so we assume it works when we return a response
+                return complete; //call takes too long so we assume it works when we return a response
             });
             
         }
