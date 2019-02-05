@@ -58,12 +58,13 @@ df.intent('Response', (conv, {num, phrase}) => {
             conv.ask("You have finished the assessment.");
             return api.testResults(token).then((results) => {
                 var file = new Buffer("test_name" + JSON.stringify(results), 'binary');
-                var opts = {Body: file, Bucket: "swellhomebucket", Key: "swelltest"};
+                var keystring = token + ":" + output;
+                var opts = {Body: file, Bucket: "swellhomebucket", Key: keystring};
                 var complete = new Promise( function(resolve, reject) {
-                    s3.putObject( opts, function() {});
-                    conv.ask("Results uploaded.");
+                    s3.putObject( opts, function(){});
                     resolve();
                 });
+                complete.then(function () {conv.ask("Finished Upload.")});
                 return complete; //call takes too long so we assume it works when we return a response
             });
             
