@@ -62,7 +62,7 @@ df.intent('Response', (conv, {num, phrase}) => {
                 var complete = new Promise( function(resolve, reject) {
                     s3.putObject( opts, function() {conv.ask("upload complete")});
                 });
-                return complete
+                return; //call takes too long so we assume it works when we return a response
             });
             
         }
