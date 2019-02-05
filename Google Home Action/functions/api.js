@@ -56,39 +56,13 @@ module.exports = {
       });
     },
     
-    administerTest: function (AssessmentToken, first, response) {
-      if (first) {
+    administerTest: function (AssessmentToken, response) {
+        var string = "";
+        if(Object.keys(response).length != 0) //response is empty
+            string = '?ItemResponseOID=' + response.id + '&Response=' + response.value;
         return request({
           'method': 'GET',
-          'uri': startURL + "Participants/" + AssessmentToken + ".json",
-          'json': true,
-          'headers': {'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64'),}
-        }).then(function (info, response) {
-          var elems = info.Items[0].Elements;
-
-          var question = '';
-          for (var n = 0; n < (elems.length - 1); n++) {
-            question += (elems[n].Description + '  ');
-          }
-
-          var choices = '';
-          var map = info.Items[0].Elements[elems.length - 1].Map
-          for (var n = 0; n < map.length; n++) {
-            choices += '(' + map[n].Value + '): '+  map[n].Description + '  ' ;
-          }
-
-          var choiceArray = [];
-          for (var n = 0; n < map.length; n++) {
-            choiceArray.push({'value': map[n].Value, 'description': map[n].Description.toLowerCase(), 'OID': map[n].ItemResponseOID});
-          }
-          return [question + " " + choices, choiceArray];
-        });
-      }
-
-      else {
-        return request({
-          'method': 'GET',
-          'uri': startURL + "Participants/" + AssessmentToken + ".json" + '?ItemResponseOID=' + response.id + '&Response=' + response.value,
+          'uri': startURL + "Participants/" + AssessmentToken + ".json" + string,
           'json': true,
           'headers': {'Authorization': 'Basic ' + Buffer.from(totalToken).toString('base64'),}
         }).then(function (info, response) {
@@ -118,7 +92,6 @@ module.exports = {
           }
 
         });
-      }
     },
 
     testResults: function (AssessmentToken) {

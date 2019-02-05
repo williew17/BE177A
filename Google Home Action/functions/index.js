@@ -14,7 +14,7 @@ var formID = '80C5D4A3-FC1F-4C1B-B07E-10B796CF8105'; // PROMIS Bank v2.0 - Physi
 
 df.intent('Patient Survey', (conv) => {
     return api.registerTest(formID).then((token) => {
-        return api.administerTest(token, true, []).then((firstQuestion) => {
+        return api.administerTest(token, {}).then((firstQuestion) => {
             conv.ask(firstQuestion[0]);
             conv.contexts.set('assessmenttoken', 3, {"token": token});
             conv.contexts.set('question', 3, {"question": firstQuestion[0]});
@@ -53,7 +53,7 @@ df.intent('Response', (conv, {num, phrase}) => {
         return;
     }
     
-    return api.administerTest(token, false, {"id": OID, "value": value}).then((output) => {
+    return api.administerTest(token, {"id": OID, "value": value}).then((output) => {
         if(output.length == 1) {
             conv.ask("You have finished the assessment.");
             return api.testResults(token).then((results) => {
