@@ -73,22 +73,22 @@ module.exports = {
           else {
             var elems = info.Items[0].Elements;
 
-            var question = '';
-            for (var n = 0; n < (elems.length - 1); n++) {
-              question += (elems[n].Description + '  ');
-            }
+          var question = '<speak><prosody rate="90%"> ';
+          for (var n = 0; n < (elems.length - 1); n++) {
+            question += (elems[n].Description + '  ');
+          }
 
-            var choices = '';
-            var map = info.Items[0].Elements[elems.length - 1].Map
-            for (var n = 0; n < map.length; n++) {
-              choices += '(' + map[n].Value + '): '+  map[n].Description + '  ' ;
-            }
+          var choices = '';
+          var map = info.Items[0].Elements[elems.length - 1].Map
+          for (var n = 0; n < map.length; n++) {
+            choices += '(' + map[n].Value + '): '+  map[n].Description + '<break time=".5s"/> ' ;
+          }
 
-            var choiceArray = [];
-            for (var n = 0; n < map.length; n++) {
-              choiceArray.push({'value': map[n].Value, 'description': map[n].Description.toLowerCase(), 'OID': map[n].ItemResponseOID});
-            }
-            return [question + " " + choices, choiceArray];
+          var choiceArray = [];
+          for (var n = 0; n < map.length; n++) {
+            choiceArray.push({'value': map[n].Value, 'description': map[n].Description.toLowerCase(), 'OID': map[n].ItemResponseOID});
+          }
+          return [question + " " + choices + '</prosody></speak>', choiceArray];
           }
 
         });
