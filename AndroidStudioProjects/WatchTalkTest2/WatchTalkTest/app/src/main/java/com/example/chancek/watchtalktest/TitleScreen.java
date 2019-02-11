@@ -16,6 +16,7 @@ import android.widget.TextView;
 public class TitleScreen extends WearableActivity {
     int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 10;
     private TextView mTextView;
+    String surveyOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F"; //Social Impact CAT
 
 
 
@@ -76,6 +77,7 @@ public class TitleScreen extends WearableActivity {
     {
         Intent intent;
         intent = new Intent(this, MainMenu.class);
+        intent.putExtra("surveyOID", surveyOID);
         startActivity(intent);
     }
 }

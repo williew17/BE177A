@@ -59,7 +59,7 @@ public class SurveyQuestion extends WearableActivity {
 
     // Must quit app if SpeechRecognizer encounters errors 3 times in a row OR the user is silent
     // for 30*MAX_ERRORS seconds; these variables handle these cases.
-    int MAX_ERRORS = 3;
+    int MAX_ERRORS = 5;
     int numErrors;
     boolean promptQuit;
 
@@ -110,6 +110,10 @@ public class SurveyQuestion extends WearableActivity {
             ActivityCompat.requestPermissions(SurveyQuestion.this, new String[]{Manifest.permission
                     .RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
         }
+
+        TextView textViewQuestion = findViewById(R.id.textViewQuestion);
+        String loadingText = "Loading...";
+        textViewQuestion.setText(loadingText);
 
         handler = new Handler(getMainLooper());
 
@@ -213,7 +217,7 @@ public class SurveyQuestion extends WearableActivity {
         {
             // Once user has finished speaking, respond appropriately
             String str = "";
-            numErrors = 0;
+
             // DO NOT CHANGE promptQuit HERE
             Log.d(TAG, "onResults " + results);
             ArrayList data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -227,6 +231,7 @@ public class SurveyQuestion extends WearableActivity {
             int idx = getIndex(spinnerOptions, mString);
             if (idx != -1) {
                 // Valid answer received
+                numErrors = 0;
                 promptQuit = false;
                 spinnerOptions.setSelection(idx);
                 submitButton.setEnabled(false);
@@ -243,6 +248,7 @@ public class SurveyQuestion extends WearableActivity {
             }
             else if (mString.contains("again") || mString.contains("repeat"))
             {
+                numErrors = 0;
                 promptQuit = false;
                 // Repeat the question and answers, and prompt for voice input
                 getVoiceInput_noUI(0);
@@ -257,9 +263,18 @@ public class SurveyQuestion extends WearableActivity {
             }
             else
             {
-                // Invalid/empty input
-                promptQuit = false;
-                getVoiceInput_noUI(1);
+                // Invalid input
+                numErrors++;
+                if (numErrors == MAX_ERRORS) {
+                    getVoiceInput_noUI(2); // prompt to quit
+                }
+                else if (numErrors > MAX_ERRORS){
+                    //Quit app
+                    QuitApp();
+                }
+                else {
+                    getVoiceInput_noUI(1); // prompt for repeat
+                }
             }
 
         }
@@ -275,6 +290,12 @@ public class SurveyQuestion extends WearableActivity {
 
 
     public void getQuestions (String itoken, String responseID, String valueID){
+        numErrors = 0;
+        tts.stop();
+        mySR.cancel();
+        TextView textViewQuestion = findViewById(R.id.textViewQuestion);
+        String loadingText = "Loading...";
+        textViewQuestion.setText(loadingText);
         // Make Request
         final RequestQueue requestQueue = Volley.newRequestQueue(this);
 
@@ -506,6 +527,8 @@ public class SurveyQuestion extends WearableActivity {
 
         tts.stop();
         tts.shutdown();
+        mySR.cancel();
+        mySR.destroy();
 
         // Make Request
         final RequestQueue requestQueue = Volley.newRequestQueue(this);
@@ -675,14 +698,14 @@ public class SurveyQuestion extends WearableActivity {
                                 "all progress will be lost.", TextToSpeech.QUEUE_FLUSH, null, null);
                         tts.speak("To confirm quit, say ", TextToSpeech.QUEUE_ADD, null, null);
 
-                        tts.playSilentUtterance(50,TextToSpeech.QUEUE_ADD,null);
+                        tts.playSilentUtterance(10,TextToSpeech.QUEUE_ADD,null);
                         tts.speak("quit.",TextToSpeech.QUEUE_ADD,null,null);
                         tts.playSilentUtterance(100,TextToSpeech.QUEUE_ADD,null);
                         tts.speak("To resume your survey, " +
                                 "respond with a valid answer to the previous question, or say ",
                                 TextToSpeech.QUEUE_ADD,null,null);
 
-                        tts.playSilentUtterance(50,TextToSpeech.QUEUE_ADD,null);
+                        tts.playSilentUtterance(10,TextToSpeech.QUEUE_ADD,null);
                         tts.speak("repeat",TextToSpeech.QUEUE_ADD,null,null);
                         tts.playSilentUtterance(100,TextToSpeech.QUEUE_ADD,null);
 
@@ -735,6 +758,7 @@ public class SurveyQuestion extends WearableActivity {
         tts.stop();
         tts.shutdown();
         mySR.cancel();
+        mySR.destroy();
 
         Intent homeIntent = new Intent(Intent.ACTION_MAIN);
         homeIntent.addCategory( Intent.CATEGORY_HOME );

@@ -14,6 +14,7 @@ import android.view.View;
 public class MainMenu extends WearableActivity {
 
     boolean useSecure = false;
+    String surveyOID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +23,8 @@ public class MainMenu extends WearableActivity {
 
         // Enables Always-on
         setAmbientEnabled();
+        Bundle extras = getIntent().getExtras();
+        surveyOID = extras.getString("surveyOID");
 
     }
 
@@ -32,6 +35,16 @@ public class MainMenu extends WearableActivity {
             intent = new Intent(this, PinPage.class);
         else
             intent = new Intent(this, SurveyQuestion.class);
+
+        startActivity(intent);
+    }
+
+    public void goToSettings(View view)
+    {
+        Intent intent;
+        intent = new Intent(this, MainSettings.class);
+
+        intent.putExtra("surveyOID", surveyOID);
 
         startActivity(intent);
     }
