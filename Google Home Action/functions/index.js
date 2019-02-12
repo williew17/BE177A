@@ -2,7 +2,9 @@
 
 const {dialogflow,Permission,Suggestions} = require('actions-on-google');
 const functions = require('firebase-functions');
-var AWS = require('aws-sdk');
+const AWS = require('aws-sdk');
+const bcrypt = require('bcrypt');
+
 AWS.config.loadFromPath('./config.json');
 const s3 = new AWS.S3();
 const df = dialogflow({debug: true});
@@ -13,20 +15,56 @@ var api = require('./api');
 var formID = '80C5D4A3-FC1F-4C1B-B07E-10B796CF8105'; // PROMIS Bank v2.0 - Physical Function
 
 df.intent('Patient Survey', (conv) => {
-    return api.registerTest(formID).then((token) => {
-        return api.administerTest(token, {}).then((firstQuestion) => {
-            conv.ask(firstQuestion[0]);
-            conv.contexts.set('assessmenttoken', 3, {"token": token});
-            conv.contexts.set('question', 3, {"question": firstQuestion[0]});
-            conv.contexts.set('choices', 3, {"choices": firstQuestion[1]});
-        })
+    conv.ask("What is your Survey ID number?");
+})
+
+df.intent('Start Survey', (conv, {idnum}) => {
+    var opts = {
+        Bucket: "swellhomebucket",
+        Key: "usernames.json"
+    }
+    var check = new Promise(resolve, reject) {
+        s3.getObject(opts, function(err, data){
+            if(err){
+                reject(err);
+            }
+            else{
+                resolve(data);
+            }
+        });
+    }
+    check.then(function(data) { 
+        var jsonData = JSON.parse(data);
+        for(let user of jsonData){
+            if (user == idnum) {
+                return true;
+            }
+        }
+        return false;
     })
+    .then(function(match) {
+        if(match){
+            return api.registerTest(formID);
+        }
+    })
+    .then(function(token) {
+        return api.administerTest(token, {});
+    })
+    .then((firstQuestion) => {
+        conv.ask(firstQuestion[0]);
+        conv.contexts.set('idnum', 3, {"idnum": idnum});
+        conv.contexts.set('assessmenttoken', 3, {"token": token});
+        conv.contexts.set('question', 3, {"question": firstQuestion[0]});
+        conv.contexts.set('choices', 3, {"choices": firstQuestion[1]});
+    });
+    
+    return check;
 })
 
 df.intent('Response', (conv, {num, phrase}) => {
     const token = conv.contexts.get('assessmenttoken').parameters.token;
     const choices = conv.contexts.get('choices').parameters.choices;
-    
+    const idnum = conv.contexts.get('idnum').parameters.idnum;
     var lowercasePhrase = '';
     var OID = '';
     var value = 0;
@@ -70,6 +108,7 @@ df.intent('Response', (conv, {num, phrase}) => {
             
         }
         conv.ask(output[0]);
+        conv.contexts.set('idnum', 3, {"idnum": idnum});
         conv.contexts.set('assessmenttoken', 3, {"token": token});
         conv.contexts.set('question', 3, {"question": output[0]});
         conv.contexts.set('choices', 3, {"choices": output[1]});
