@@ -13,9 +13,14 @@ var api = require('./api');
 var formID = '80C5D4A3-FC1F-4C1B-B07E-10B796CF8105'; // PROMIS Bank v2.0 - Physical Function
 
 df.intent('Patient Survey', (conv) => {
+    conv.ask("What is your Survey ID number?");
+})
+
+df.intent('Start Survey', (conv, {idnum}) => {
     return api.registerTest(formID).then((token) => {
         return api.administerTest(token, {}).then((firstQuestion) => {
             conv.ask(firstQuestion[0]);
+            conv.contexts.set('idnum', 3, {"idnum": idnum});
             conv.contexts.set('assessmenttoken', 3, {"token": token});
             conv.contexts.set('question', 3, {"question": firstQuestion[0]});
             conv.contexts.set('choices', 3, {"choices": firstQuestion[1]});
@@ -26,7 +31,7 @@ df.intent('Patient Survey', (conv) => {
 df.intent('Response', (conv, {num, phrase}) => {
     const token = conv.contexts.get('assessmenttoken').parameters.token;
     const choices = conv.contexts.get('choices').parameters.choices;
-    
+    const idnum = conv.contexts.get('idnum').parameters.idnum;
     var lowercasePhrase = '';
     var OID = '';
     var value = 0;
@@ -70,6 +75,7 @@ df.intent('Response', (conv, {num, phrase}) => {
             
         }
         conv.ask(output[0]);
+        conv.contexts.set('idnum', 3, {"idnum": idnum});
         conv.contexts.set('assessmenttoken', 3, {"token": token});
         conv.contexts.set('question', 3, {"question": output[0]});
         conv.contexts.set('choices', 3, {"choices": output[1]});
