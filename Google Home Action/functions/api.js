@@ -81,7 +81,7 @@ module.exports = {
           var choices = '';
           var map = info.Items[0].Elements[elems.length - 1].Map
           for (var n = 0; n < map.length; n++) {
-            choices += '(' + map[n].Value + '): '+  map[n].Description + '<break time=".5s"/> ' ;
+            choices += '(' + map[n].Value + '): '+  map[n].Description + ' <break time=".5s"/> ' ;
           }
 
           var choiceArray = [];
