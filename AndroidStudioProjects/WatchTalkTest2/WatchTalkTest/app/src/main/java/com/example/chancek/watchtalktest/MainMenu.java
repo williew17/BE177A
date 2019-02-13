@@ -31,10 +31,8 @@ public class MainMenu extends WearableActivity {
     public void startSurvey(View view)
     {
         Intent intent;
-        if (useSecure)
-            intent = new Intent(this, PinPage.class);
-        else
-            intent = new Intent(this, SurveyQuestion.class);
+        intent = new Intent(this, SurveyQuestion.class);
+        intent.putExtra("surveyOID", surveyOID);
 
         startActivity(intent);
     }
@@ -43,8 +41,6 @@ public class MainMenu extends WearableActivity {
     {
         Intent intent;
         intent = new Intent(this, MainSettings.class);
-
-        intent.putExtra("surveyOID", surveyOID);
 
         startActivity(intent);
     }

@@ -30,10 +30,6 @@
         <meta-data
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
-
-        <activity
-            android:name=".MainSettings"
-            android:label="@string/title_activity_main_settings"></activity>
         <activity
             android:name=".TitleScreen"
             android:label="@string/app_name">
@@ -43,6 +39,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MainSettings" />
         <activity android:name=".MainMenu" />
         <activity android:name=".PinPage" />
         <activity android:name=".SurveyQuestion" />

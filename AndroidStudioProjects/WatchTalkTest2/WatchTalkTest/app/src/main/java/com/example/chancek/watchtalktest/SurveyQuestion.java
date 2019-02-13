@@ -53,7 +53,7 @@ public class SurveyQuestion extends WearableActivity {
     //String testOID = "C1E44752-BCBD-4130-A307-67F6758F3891";
 
     // ASCQ Me Social Functioning impact CAT
-    String testOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F";
+    String testOID; // = "042ED857-B664-4A22-B5FA-6CF3CF15763F";
 
     String filename = "WatchTalkTest_Results.txt";
 
@@ -103,6 +103,9 @@ public class SurveyQuestion extends WearableActivity {
 
         // Enables Always-on
         setAmbientEnabled();
+
+        Bundle extras = getIntent().getExtras();
+        testOID = extras.getString("surveyOID");
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -501,7 +504,8 @@ public class SurveyQuestion extends WearableActivity {
         promptQuit = false;
         int index = spinnerOptions.getSelectedItemPosition();
         String responseID = responseIDArray.get(index).toString();
-        String valueID = Integer.toString(index + 1);
+        String valueID = Integer.toString(index + 1); //TODO: use the actual valueID provided by
+        // Assessment Center API, since some exams apparently have ascending or descending order
 
         Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
 
