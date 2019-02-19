@@ -3,7 +3,7 @@
 const {dialogflow,Permission,Suggestions} = require('actions-on-google');
 const functions = require('firebase-functions');
 const AWS = require('aws-sdk');
-const bcrypt = require('bcrypt');
+//const bcrypt = require('bcrypt');
 
 AWS.config.loadFromPath('./config.json');
 const s3 = new AWS.S3();
@@ -23,7 +23,7 @@ df.intent('Start Survey', (conv, {idnum}) => {
         Bucket: "swellhomebucket",
         Key: "usernames.json"
     }
-    var check = new Promise(resolve, reject) {
+    var check = new Promise( function(resolve, reject) {
         s3.getObject(opts, function(err, data){
             if(err){
                 reject(err);
@@ -32,10 +32,12 @@ df.intent('Start Survey', (conv, {idnum}) => {
                 resolve(data);
             }
         });
-    }
-    check.then(function(data) { 
-        var jsonData = JSON.parse(data);
-        for(let user of jsonData){
+    })
+    .then(function(data) { 
+        conv.ask(data);
+        return Promise.reject();
+        //var jsonData = JSON.parse(data);
+        for(let user of data){
             if (user == idnum) {
                 return true;
             }
