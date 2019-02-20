@@ -1,6 +1,9 @@
 package com.example.chancek.watchtalktest;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -13,12 +16,16 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.TextView;
 
+import java.util.Calendar;
+
 public class TitleScreen extends WearableActivity {
     int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 10;
     private TextView mTextView;
     //String surveyOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F"; //Social Impact CAT
     String surveyOID = "80C5D4A3-FC1F-4C1B-B07E-10B796CF8105"; //PROMIS Physical Function
 
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +62,24 @@ public class TitleScreen extends WearableActivity {
                     .RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
         }
 
+        // Create alarm manager
+        alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        // Create pending intent & register it to the alarm notifier class
+        Intent intent = new Intent(getBaseContext(), AlarmTrigger.class);
+        alarmIntent = PendingIntent.getBroadcast(TitleScreen.this,0,intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Get the current time and add the seconds to it
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        // Set the alarm set off at 10:00 AM
+        calendar.set(Calendar.HOUR_OF_DAY, 10);
+        calendar.set(Calendar.MINUTE, 0);
+
+        // Repeat the alarm every minute
+        alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                1000*60*1, alarmIntent);
 
 
 
