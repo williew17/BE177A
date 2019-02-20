@@ -49,11 +49,7 @@ public class SurveyQuestion extends WearableActivity {
     // Global variables
     int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 10;
 
-    // PROMIS Pain interference non-CAT
-    //String testOID = "C1E44752-BCBD-4130-A307-67F6758F3891";
-
-    // ASCQ Me Social Functioning impact CAT
-    String testOID; // = "042ED857-B664-4A22-B5FA-6CF3CF15763F";
+    String testOID;
 
     String filename = "WatchTalkTest_Results.txt";
 
@@ -83,7 +79,7 @@ public class SurveyQuestion extends WearableActivity {
     String totalToken = textID + ":" + textToken;
 
     //TODO: define what type of ArrayList this is (i.e. ArrayList<String>)
-    ArrayList responseIDArray = new ArrayList();
+    ArrayList<String> responseIDArray = new ArrayList<>();
 
     // Make array for options
     ArrayList<String> optionsArray = new ArrayList<>();
@@ -355,7 +351,8 @@ public class SurveyQuestion extends WearableActivity {
 
                             for (int i = 0; i < mapArray.length(); i++) {
                                 optionsArray.add(mapArray.getJSONObject(i).get("Description").toString());
-                                responseIDArray.add(mapArray.getJSONObject(i).get("ItemResponseOID"));
+                                responseIDArray.add(mapArray.getJSONObject(i).get(
+                                        "ItemResponseOID").toString());
                             }
 
 
@@ -471,7 +468,7 @@ public class SurveyQuestion extends WearableActivity {
                 //              System.out.print(base64);
 
 
-                Map<String, String> params = new HashMap<String, String>();
+                Map<String, String> params = new HashMap<>();
                 params.put("Content-Type", "application/x-www-form-urlencoded");
                 params.put("Authorization", "Basic " + base64);
                 return params;
@@ -486,8 +483,7 @@ public class SurveyQuestion extends WearableActivity {
     }
 
     public void LoadSpinner(ArrayList<String> optionsArray){
-        //Spinner spinnerOptions = findViewById(R.id.spinnerOptions);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, optionsArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, optionsArray);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerOptions.setAdapter(adapter);
 
@@ -503,7 +499,7 @@ public class SurveyQuestion extends WearableActivity {
         numErrors = 0;
         promptQuit = false;
         int index = spinnerOptions.getSelectedItemPosition();
-        String responseID = responseIDArray.get(index).toString();
+        String responseID = responseIDArray.get(index);
         String valueID = Integer.toString(index + 1); //TODO: use the actual valueID provided by
         // Assessment Center API, since some exams apparently have ascending or descending order
 
@@ -519,7 +515,7 @@ public class SurveyQuestion extends WearableActivity {
         promptQuit = false;
 
         int index = spinnerOptions.getSelectedItemPosition();
-        String responseID = responseIDArray.get(index).toString();
+        String responseID = responseIDArray.get(index);
         String valueID = Integer.toString(index + 1);
 
         Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
@@ -594,7 +590,7 @@ public class SurveyQuestion extends WearableActivity {
                 //              System.out.print(base64);
 
 
-                Map<String, String> params = new HashMap<String, String>();
+                Map<String, String> params = new HashMap<>();
                 params.put("Content-Type", "application/x-www-form-urlencoded");
                 params.put("Authorization", "Basic " + base64);
                 return params;
@@ -768,6 +764,8 @@ public class SurveyQuestion extends WearableActivity {
         homeIntent.addCategory( Intent.CATEGORY_HOME );
         homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(homeIntent);
+
+        this.finishAffinity();
     }
 }
 

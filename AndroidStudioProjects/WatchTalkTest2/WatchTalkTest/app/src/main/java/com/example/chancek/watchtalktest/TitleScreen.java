@@ -16,8 +16,8 @@ import android.widget.TextView;
 public class TitleScreen extends WearableActivity {
     int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 10;
     private TextView mTextView;
-    String surveyOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F"; //Social Impact CAT
-
+    //String surveyOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F"; //Social Impact CAT
+    String surveyOID = "80C5D4A3-FC1F-4C1B-B07E-10B796CF8105"; //PROMIS Physical Function
 
 
     @Override

@@ -46,6 +46,9 @@ public class MainSettings extends WearableActivity {
         nameArray.add("ASCQ-Me Pain Impact CAT");
         testMap.put("ASCQ-Me Pain Impact CAT", "A42E79AB-FE2B-4665-8089-BE1AA4C32D6B");
 
+        nameArray.add("PROMIS Physical Function");
+        testMap.put("PROMIS Physical Function", "80C5D4A3-FC1F-4C1B-B07E-10B796CF8105");
+
         LoadSpinner(nameArray);
     }
 
