@@ -80,7 +80,11 @@ public class SurveyQuestion extends WearableActivity {
     String textToken = "3171FF33-83C5-4221-9BB0-051DC747AEB9";
     String totalToken = textID + ":" + textToken;
 
+    // array of response ID values
     ArrayList<String> responseIDArray = new ArrayList<>();
+
+    // array of Value IDs
+    ArrayList<String> valueIDArray = new ArrayList<>();
 
     // Make array for options
     ArrayList<String> optionsArray = new ArrayList<>();
@@ -354,6 +358,7 @@ public class SurveyQuestion extends WearableActivity {
                             // clear optionsArray and responseIDArray
                             optionsArray.clear();
                             responseIDArray.clear();
+                            valueIDArray.clear();
                             ClearRadioGroup();
 
 
@@ -361,6 +366,7 @@ public class SurveyQuestion extends WearableActivity {
                                 optionsArray.add(mapArray.getJSONObject(i).get("Description").toString());
                                 responseIDArray.add(mapArray.getJSONObject(i).get(
                                         "ItemResponseOID").toString());
+                                valueIDArray.add(mapArray.getJSONObject(i).get("Value").toString());
                             }
 
 
@@ -520,8 +526,8 @@ public class SurveyQuestion extends WearableActivity {
         promptQuit = false;
 
         String responseID = responseIDArray.get(index);
-        String valueID = Integer.toString(index + 1); //TODO: use the actual valueID provided by
-        // Assessment Center API, since some exams apparently have ascending or descending order
+        String valueID = valueIDArray.get(index);
+        //String valueID = Integer.toString(index + 1);
 
         Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
 
@@ -537,7 +543,8 @@ public class SurveyQuestion extends WearableActivity {
         //int index = spinnerOptions.getSelectedItemPosition();
         //int index = GetCheckedIndex(rGroup);
         String responseID = responseIDArray.get(answerIdx);
-        String valueID = Integer.toString(answerIdx + 1);
+        String valueID = valueIDArray.get(answerIdx);
+        //String valueID = Integer.toString(answerIdx + 1);
 
         Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
 
