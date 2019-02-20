@@ -1,7 +1,6 @@
 package com.example.chancek.watchtalktest;
 
 import android.Manifest;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,6 +21,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -61,7 +62,8 @@ public class SurveyQuestion extends WearableActivity {
 
     TextToSpeech tts;
     String gQuestion;
-    Spinner spinnerOptions;
+    //Spinner spinnerOptions;
+    RadioGroup rGroup;
     Vibrator vibrator;
     Button submitButton;
 
@@ -78,7 +80,6 @@ public class SurveyQuestion extends WearableActivity {
     String textToken = "3171FF33-83C5-4221-9BB0-051DC747AEB9";
     String totalToken = textID + ":" + textToken;
 
-    //TODO: define what type of ArrayList this is (i.e. ArrayList<String>)
     ArrayList<String> responseIDArray = new ArrayList<>();
 
     // Make array for options
@@ -120,6 +121,8 @@ public class SurveyQuestion extends WearableActivity {
 
         submitButton = findViewById(R.id.submit_button);
         submitButton.setEnabled(false);
+
+        rGroup = findViewById(R.id.radioGroup);
 
         mySR = SpeechRecognizer.createSpeechRecognizer(this);
         mySR.setRecognitionListener(new listener());
@@ -168,7 +171,7 @@ public class SurveyQuestion extends WearableActivity {
             }
         });
 
-        spinnerOptions = findViewById(R.id.spinnerOptions);
+        //spinnerOptions = findViewById(R.id.spinnerOptions);
         numErrors = 0;
         promptQuit = false;
 
@@ -227,23 +230,27 @@ public class SurveyQuestion extends WearableActivity {
             }
             String mString = str.toLowerCase();
 
-            int idx = getIndex(spinnerOptions, mString);
+            int idx = getIndex(optionsArray, mString);
             if (idx != -1) {
                 // Valid answer received
                 numErrors = 0;
                 promptQuit = false;
-                spinnerOptions.setSelection(idx);
+                //spinnerOptions.setSelection(idx);
+                RadioButton rb = (RadioButton) rGroup.getChildAt(idx);
+                int rbID = rb.getId();
+                rGroup.check(rbID);
                 submitButton.setEnabled(false);
-                new CountDownTimer(500,100){
+                /*new CountDownTimer(500,100){
                     public void onTick(long millisUntilFinished) {
                         //do nothing
                     }
 
                     public void onFinish() {
-                        submitAnswer();
+                        submitAnswer(idx);
                     }
 
-                }.start();
+                }.start();*/
+                submitAnswer(idx);
             }
             else if (mString.contains("again") || mString.contains("repeat"))
             {
@@ -347,6 +354,7 @@ public class SurveyQuestion extends WearableActivity {
                             // clear optionsArray and responseIDArray
                             optionsArray.clear();
                             responseIDArray.clear();
+                            ClearRadioGroup();
 
 
                             for (int i = 0; i < mapArray.length(); i++) {
@@ -357,7 +365,10 @@ public class SurveyQuestion extends WearableActivity {
 
 
                             //Load Spinner with Options
-                            LoadSpinner(optionsArray);
+                            //LoadSpinner(optionsArray);
+
+                            //Load radioGroup with Options
+                            LoadRadioGroup(optionsArray);
 
                             //use tts to speak answers
                             String currentAnswer;
@@ -482,23 +493,32 @@ public class SurveyQuestion extends WearableActivity {
 
     }
 
+    /*
     public void LoadSpinner(ArrayList<String> optionsArray){
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, optionsArray);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerOptions.setAdapter(adapter);
 
     }
+    */
 
     // submit via button
     public void submitAnswer(View view)
     {
-        //String selectedAnswer = spinnerOptions.getSelectedItem().toString();
+        //int index = spinnerOptions.getSelectedItemPosition();
+        int index = GetCheckedIndex(rGroup);
+        if (index == -1)
+        {
+            vibrator.vibrate(1000);
+            return;
+        }
+
         tts.stop();
         mySR.cancel();
         submitButton.setEnabled(false);
         numErrors = 0;
         promptQuit = false;
-        int index = spinnerOptions.getSelectedItemPosition();
+
         String responseID = responseIDArray.get(index);
         String valueID = Integer.toString(index + 1); //TODO: use the actual valueID provided by
         // Assessment Center API, since some exams apparently have ascending or descending order
@@ -509,14 +529,15 @@ public class SurveyQuestion extends WearableActivity {
     }
 
     // submit via code
-    public void submitAnswer()
+    public void submitAnswer(int answerIdx)
     {
         numErrors = 0;
         promptQuit = false;
 
-        int index = spinnerOptions.getSelectedItemPosition();
-        String responseID = responseIDArray.get(index);
-        String valueID = Integer.toString(index + 1);
+        //int index = spinnerOptions.getSelectedItemPosition();
+        //int index = GetCheckedIndex(rGroup);
+        String responseID = responseIDArray.get(answerIdx);
+        String valueID = Integer.toString(answerIdx + 1);
 
         Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
 
@@ -717,6 +738,7 @@ public class SurveyQuestion extends WearableActivity {
         }
     }
 
+    /*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -738,15 +760,50 @@ public class SurveyQuestion extends WearableActivity {
             }
 
         }
+    }*/
+
+    public void LoadRadioGroup(ArrayList<String> optionsArr){
+        //RadioGroup rGroup = findViewById(R.id.radioGroup);
+        rGroup.setOrientation(RadioGroup.VERTICAL);
+        for (int i = 0;i<optionsArr.size();i++){
+            RadioButton rb = new RadioButton(this);
+            rb.setText(optionsArr.get(i));
+            rGroup.addView(rb,i);
+
+        }
+
     }
 
-    //Get the index of the spinner element matching myString.  Return -1 if no match found
-    private int getIndex(Spinner spinner, String myString){
+    // Get the index of the selected radio button, assuming the RadioGroup only has radio buttons
+    // as child objects.  Return -1 if no checked button is found.
+    public int GetCheckedIndex(RadioGroup rg){
+        int radioButtonID = rg.getCheckedRadioButtonId();
+        if (radioButtonID == -1)
+            return radioButtonID;
+        View radioButton = rg.findViewById(radioButtonID);
+        return rg.indexOfChild(radioButton);
+    }
+
+    public String GetStringOfChecked(RadioGroup rg){
+        int idx = GetCheckedIndex(rg);
+        RadioButton r = (RadioButton) rg.getChildAt(idx);
+        return r.getText().toString();
+    }
+
+    public void ClearRadioGroup() {
+        //RadioGroup rGroup = findViewById(R.id.radioGroup);
+        rGroup.clearCheck();
+        rGroup.removeAllViews();
+    }
+
+    //Get the index of the optionsArray element matching myString.  Return -1 if no match found
+    private int getIndex(ArrayList<String> arr, String myString){
 
         int index = -1;
+        myString = myString.toLowerCase();
 
-        for (int i=0;i<spinner.getCount();i++){
-            if (myString.contains(spinner.getItemAtPosition(i).toString().toLowerCase())){
+        for (int i=0;i<arr.size();i++){
+            if (myString.contains(arr.get(i).toLowerCase())){
                 index = i;
                 break;
             }
