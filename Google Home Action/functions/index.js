@@ -24,6 +24,7 @@ df.intent('Start Survey', (conv, {idnum}) => {
             conv.contexts.set('assessmenttoken', 3, {"token": token});
             conv.contexts.set('question', 3, {"question": firstQuestion[0]});
             conv.contexts.set('choices', 3, {"choices": firstQuestion[1]});
+            conv.contexts.set('start', 30, {"start": new Date(Date.now()).toTimeString()});
         })
     })
 })
@@ -32,6 +33,7 @@ df.intent('Response', (conv, {num, phrase}) => {
     const token = conv.contexts.get('assessmenttoken').parameters.token;
     const choices = conv.contexts.get('choices').parameters.choices;
     const idnum = conv.contexts.get('idnum').parameters.idnum;
+    const startdate = conv.contexts.get('start').parameters.start;
     var lowercasePhrase = '';
     var OID = '';
     var value = 0;
@@ -63,7 +65,7 @@ df.intent('Response', (conv, {num, phrase}) => {
             conv.ask("You have finished the assessment.");
             return api.testResults(token).then((results) => {
                 var file = new Buffer("test_name" + JSON.stringify(results), 'binary');
-                var keystring = idnum.toUpperCase() + ":" + output[0].replace(/\//g, "-");
+                var keystring = idnum.toUpperCase() + ":" + output[0].replace(/\//g, "-") + ":" + startdate;
                 var opts = {Body: file, Bucket: "swellhomebucket", Key: keystring};
                 var complete = new Promise( function(resolve, reject) {
                     s3.putObject( opts, function(){});
