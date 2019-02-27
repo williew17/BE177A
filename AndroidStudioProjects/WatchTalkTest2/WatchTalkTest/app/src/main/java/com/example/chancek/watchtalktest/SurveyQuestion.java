@@ -48,10 +48,7 @@ import java.util.Random;
 public class SurveyQuestion extends WearableActivity {
 
     // Global variables
-    int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 10;
-
     String testOID;
-
     String filename = "WatchTalkTest_Results.txt";
 
     // Must quit app if SpeechRecognizer encounters errors 3 times in a row OR the user is silent
@@ -62,7 +59,6 @@ public class SurveyQuestion extends WearableActivity {
 
     TextToSpeech tts;
     String gQuestion;
-    //Spinner spinnerOptions;
     RadioGroup rGroup;
     Vibrator vibrator;
     Button submitButton;
@@ -73,7 +69,6 @@ public class SurveyQuestion extends WearableActivity {
 
     //Private variables
     private SpeechRecognizer mySR;
-    private static final int REQ_CODE_SPEECH_INPUT = 100;
 
     // Initialize variables that store registration ID and token
     String textID = "0ED7B052-FDB2-4EDF-9B4B-E732F69DDF7A";
@@ -89,9 +84,14 @@ public class SurveyQuestion extends WearableActivity {
     // Make array for options
     ArrayList<String> optionsArray = new ArrayList<>();
 
+    // setup timestamps (First array element is start time, subsequent elements are lengths of time
+    // taken to finish the corresponding question)
+    Long startTime;
+    ArrayList<Long> timeArray = new ArrayList<>();
+
     String gToken;
     String URL;
-    String TAG = "WATCHTALKTEST";
+    String TAG = "WATCH_TALK_TEST";
 
     // Initialize handler for running tts, voice recognition in main thread
     public static Handler handler;
@@ -107,13 +107,6 @@ public class SurveyQuestion extends WearableActivity {
 
         Bundle extras = getIntent().getExtras();
         testOID = extras.getString("surveyOID");
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted
-            ActivityCompat.requestPermissions(SurveyQuestion.this, new String[]{Manifest.permission
-                    .RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-        }
 
         TextView textViewQuestion = findViewById(R.id.textViewQuestion);
         String loadingText = "Loading...";
@@ -145,7 +138,7 @@ public class SurveyQuestion extends WearableActivity {
                     tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                         @Override
                         public void onDone(String utteranceId) {
-                            Log.d("MainMenu", "TTS finished");
+                            Log.d(TAG, "TTS finished");
 
                             if (utteranceId.equals(QUESTION_DONE)){
                                 submitButton.setEnabled(true);
@@ -178,6 +171,9 @@ public class SurveyQuestion extends WearableActivity {
         //spinnerOptions = findViewById(R.id.spinnerOptions);
         numErrors = 0;
         promptQuit = false;
+
+        startTime = System.currentTimeMillis();
+        timeArray.add(startTime);
 
         // Generate participant token
         String tokenURL = "https://www.assessmentcenter.net/ac_api/2014-01/Assessments/" +
@@ -239,7 +235,7 @@ public class SurveyQuestion extends WearableActivity {
                 // Valid answer received
                 numErrors = 0;
                 promptQuit = false;
-                //spinnerOptions.setSelection(idx);
+
                 RadioButton rb = (RadioButton) rGroup.getChildAt(idx);
                 int rbID = rb.getId();
                 rGroup.check(rbID);
@@ -368,10 +364,6 @@ public class SurveyQuestion extends WearableActivity {
                                         "ItemResponseOID").toString());
                                 valueIDArray.add(mapArray.getJSONObject(i).get("Value").toString());
                             }
-
-
-                            //Load Spinner with Options
-                            //LoadSpinner(optionsArray);
 
                             //Load radioGroup with Options
                             LoadRadioGroup(optionsArray);
@@ -531,6 +523,9 @@ public class SurveyQuestion extends WearableActivity {
 
         Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
 
+        Long timeTaken = System.currentTimeMillis()-timeArray.get(timeArray.size()-1);
+        timeArray.add(timeTaken);
+
         getQuestions(gToken,responseID,valueID);
     }
 
@@ -547,6 +542,9 @@ public class SurveyQuestion extends WearableActivity {
         //String valueID = Integer.toString(answerIdx + 1);
 
         Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
+
+        Long timeTaken = System.currentTimeMillis()-timeArray.get(timeArray.size()-1);
+        timeArray.add(timeTaken);
 
         getQuestions(gToken,responseID,valueID);
     }
@@ -583,8 +581,9 @@ public class SurveyQuestion extends WearableActivity {
                             outputStream.close();
 
                             Intent intent = new Intent(SurveyQuestion.this, ExitPage.class);
-                            intent.putExtra("Date", dateFinished + " Results received.");
+                            intent.putExtra("Date", dateFinished);
                             intent.putExtra("Filename", filename);
+                            //TODO: also transfer timeArray
                             startActivity(intent);
 
                         } catch (Exception e) {
@@ -791,11 +790,13 @@ public class SurveyQuestion extends WearableActivity {
         return rg.indexOfChild(radioButton);
     }
 
+    /*
     public String GetStringOfChecked(RadioGroup rg){
         int idx = GetCheckedIndex(rg);
         RadioButton r = (RadioButton) rg.getChildAt(idx);
         return r.getText().toString();
     }
+    */
 
     public void ClearRadioGroup() {
         //RadioGroup rGroup = findViewById(R.id.radioGroup);

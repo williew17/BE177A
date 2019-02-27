@@ -19,7 +19,7 @@ import android.widget.TextView;
 import java.util.Calendar;
 
 public class TitleScreen extends WearableActivity {
-    int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 10;
+
     private TextView mTextView;
     //String surveyOID = "042ED857-B664-4A22-B5FA-6CF3CF15763F"; //Social Impact CAT
     String surveyOID = "80C5D4A3-FC1F-4C1B-B07E-10B796CF8105"; //PROMIS Physical Function
@@ -55,13 +55,9 @@ public class TitleScreen extends WearableActivity {
 
         // Enables Always-on
         setAmbientEnabled();
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted
-            ActivityCompat.requestPermissions(TitleScreen.this, new String[]{Manifest.permission
-                    .RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-        }
 
+
+        /*
         // Create alarm manager
         alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         // Create pending intent & register it to the alarm notifier class
@@ -80,7 +76,7 @@ public class TitleScreen extends WearableActivity {
         // Repeat the alarm every minute
         alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
                 1000*60*1, alarmIntent);
-
+        */
 
 
         new CountDownTimer(2000,500){
