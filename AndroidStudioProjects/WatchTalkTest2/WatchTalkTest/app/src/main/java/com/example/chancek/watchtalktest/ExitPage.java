@@ -29,7 +29,7 @@ public class ExitPage extends WearableActivity {
     AmazonS3 s3Client;
     String bucket = "quanhaibucket";
     File uploadit;
-    //File downloadit;
+    File uploadit_Times;
     TransferUtility transferUtility;
 
     TextView mTextView;
@@ -54,12 +54,19 @@ public class ExitPage extends WearableActivity {
         Bundle extras = getIntent().getExtras();
         String dateFinished = extras.getString("Date");
         String filename = extras.getString("Filename");
+        String timesFilename = extras.getString("TimesFilename");
 
         // Find path of the saved JSON file
         File file = new File(getFilesDir() + "/" + filename);
         String dir = file.getAbsolutePath();
         Log.d("pathname",dir);
         uploadit = new File(dir);
+
+        // Find path of the saved times file
+        File timeFile = new File(getFilesDir() + "/" + timesFilename);
+        String timeDir = timeFile.getAbsolutePath();
+        Log.d("pathname",timeDir);
+        uploadit_Times = new File(timeDir);
 
         FileInputStream in;
         String fileString = "";
@@ -90,7 +97,8 @@ public class ExitPage extends WearableActivity {
 
         textExit.setText(totalText);
 
-        uploadtoS3(filename);
+        uploadtoS3(filename, uploadit);
+        uploadtoS3(timesFilename, uploadit_Times);
 
     }
 
@@ -111,6 +119,7 @@ public class ExitPage extends WearableActivity {
         // Set the region of your S3 bucket
         s3Client.setRegion(Region.getRegion(Regions.US_WEST_1));
     }
+
     public void setTransferUtility(){
         transferUtility = TransferUtility.builder()
                 .context(getApplicationContext())
@@ -119,11 +128,11 @@ public class ExitPage extends WearableActivity {
                 .build();
     }
 
-    public void uploadtoS3(String filename){
+    public void uploadtoS3(String filename, File toUpload){
         TransferObserver transferObserver = transferUtility.upload(
                 bucket,
                 filename,
-                uploadit
+                toUpload
         );
         transferObserverListener(transferObserver);
     }
@@ -132,13 +141,13 @@ public class ExitPage extends WearableActivity {
         transferObserver.setTransferListener(new TransferListener() {
             @Override
             public void onStateChanged(int id, TransferState state) {
-                Toast.makeText(getApplicationContext(), "State Change "
+                Toast.makeText(getApplicationContext(), "Upload: "
                         + state, Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
                 int percentage = (int) (bytesCurrent / bytesTotal * 100);
-                Toast.makeText(getApplicationContext(), "Progress in %"
+                Toast.makeText(getApplicationContext(), "Uploading: %"
                         + percentage, Toast.LENGTH_SHORT).show();
             }
             @Override

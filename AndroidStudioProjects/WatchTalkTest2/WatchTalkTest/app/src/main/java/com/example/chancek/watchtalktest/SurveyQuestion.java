@@ -26,6 +26,7 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.amazonaws.util.StringUtils;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -50,6 +51,7 @@ public class SurveyQuestion extends WearableActivity {
     // Global variables
     String testOID;
     String filename = "WatchTalkTest_Results.txt";
+    String timesFilename = "WatchTalkTest_Times.txt";
 
     // Must quit app if SpeechRecognizer encounters errors 3 times in a row OR the user is silent
     // for 30*MAX_ERRORS seconds; these variables handle these cases.
@@ -573,17 +575,36 @@ public class SurveyQuestion extends WearableActivity {
 
                         String fileString;
                         FileOutputStream outputStream;
+                        FileOutputStream outputStream2;
 
                         try {
+                            // write the Assessment Center response file to a .txt
                             fileString = response.toString();
                             outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
                             outputStream.write(fileString.getBytes());
                             outputStream.close();
 
+                            //write the question/answer times and the date finished to a .txt
+                            String timeStr;
+                            StringBuilder sBuilder = new StringBuilder();
+                            sBuilder.append(dateFinished);
+                            sBuilder.append("\n");
+                            for (Long timeStamp : timeArray)
+                            {
+                                sBuilder.append(timeStamp.toString());
+                                sBuilder.append(",");
+                            }
+
+                            timeStr = sBuilder.toString();
+                            outputStream2 = openFileOutput(timesFilename, Context.MODE_PRIVATE);
+                            outputStream2.write(timeStr.getBytes());
+                            outputStream2.close();
+
                             Intent intent = new Intent(SurveyQuestion.this, ExitPage.class);
                             intent.putExtra("Date", dateFinished);
                             intent.putExtra("Filename", filename);
-                            //TODO: also transfer timeArray
+                            intent.putExtra("TimesFilename", timesFilename);
+
                             startActivity(intent);
 
                         } catch (Exception e) {
@@ -591,6 +612,7 @@ public class SurveyQuestion extends WearableActivity {
                             Intent intent = new Intent(SurveyQuestion.this, ExitPage.class);
                             intent.putExtra("Date", dateFinished +" Could not get results.");
                             intent.putExtra("Filename", "");
+                            intent.putExtra("TimesFilename", "");
                             startActivity(intent);
                         }
 

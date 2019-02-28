@@ -83,11 +83,11 @@ public class MainMenu extends WearableActivity {
                 }
                 else
                     Log.e("error", "Initialization Failed!");
+
+                tts.speak("Welcome! Press Start to begin your survey.", TextToSpeech.QUEUE_FLUSH,null,
+                        null);
             }
         });
-
-        tts.speak("Welcome! Press Start to begin your survey.", TextToSpeech.QUEUE_FLUSH,null,
-                null);
     }
 
     public void startSurvey(View view)
