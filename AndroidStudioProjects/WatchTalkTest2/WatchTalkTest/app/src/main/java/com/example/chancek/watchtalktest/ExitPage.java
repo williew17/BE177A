@@ -1,6 +1,8 @@
 package com.example.chancek.watchtalktest;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +35,8 @@ public class ExitPage extends WearableActivity {
     TransferUtility transferUtility;
 
     TextView mTextView;
+    int uploadsComplete;
+    int numFiles = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +51,8 @@ public class ExitPage extends WearableActivity {
         // Get credentials for Amazon S3 Bucket
         s3credentialsProvider();
         setTransferUtility();
+
+        uploadsComplete = 0;
 
        //Display date finished
         TextView textExit = findViewById(R.id.textExit);
@@ -143,6 +149,15 @@ public class ExitPage extends WearableActivity {
             public void onStateChanged(int id, TransferState state) {
                 Toast.makeText(getApplicationContext(), "Upload: "
                         + state, Toast.LENGTH_SHORT).show();
+                if(state == TransferState.COMPLETED)
+                {
+                    uploadsComplete++;
+                }
+
+                if(uploadsComplete == numFiles)
+                {
+                    QuitApp();
+                }
             }
             @Override
             public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
@@ -155,5 +170,30 @@ public class ExitPage extends WearableActivity {
                 Log.e("error", "error");
             }
         });
+    }
+
+    public void QuitApp(){
+        new CountDownTimer(1000,100){
+            public void onTick(long millisUntilFinished) {
+                //do nothing
+            }
+
+            public void onFinish() {
+                WrapUp();
+            }
+
+        }.start();
+
+
+    }
+
+    public void WrapUp()
+    {
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory( Intent.CATEGORY_HOME );
+        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(homeIntent);
+
+        this.finishAffinity();
     }
 }

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -19,10 +20,13 @@ import android.support.wearable.activity.WearableActivity;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -91,6 +95,9 @@ public class SurveyQuestion extends WearableActivity {
     Long startTime;
     ArrayList<Long> timeArray = new ArrayList<>();
 
+    TextView textViewQuestion;
+    ScrollView sView;
+
     String gToken;
     String URL;
     String TAG = "WATCH_TALK_TEST";
@@ -110,9 +117,10 @@ public class SurveyQuestion extends WearableActivity {
         Bundle extras = getIntent().getExtras();
         testOID = extras.getString("surveyOID");
 
-        TextView textViewQuestion = findViewById(R.id.textViewQuestion);
+        textViewQuestion = findViewById(R.id.textViewQuestion);
         String loadingText = "Loading...";
         textViewQuestion.setText(loadingText);
+        sView = findViewById(R.id.myScrollView);
 
         handler = new Handler(getMainLooper());
 
@@ -242,6 +250,10 @@ public class SurveyQuestion extends WearableActivity {
                 int rbID = rb.getId();
                 rGroup.check(rbID);
                 submitButton.setEnabled(false);
+
+                String loadingText = "Loading...";
+                textViewQuestion.setText(loadingText);
+                scrollToView(sView,findViewById(rbID));
                 /*new CountDownTimer(500,100){
                     public void onTick(long millisUntilFinished) {
                         //do nothing
@@ -301,9 +313,10 @@ public class SurveyQuestion extends WearableActivity {
         numErrors = 0;
         tts.stop();
         mySR.cancel();
-        TextView textViewQuestion = findViewById(R.id.textViewQuestion);
+
         String loadingText = "Loading...";
         textViewQuestion.setText(loadingText);
+
         // Make Request
         final RequestQueue requestQueue = Volley.newRequestQueue(this);
 
@@ -337,11 +350,12 @@ public class SurveyQuestion extends WearableActivity {
                             }
 
                             //get question from api
-                            TextView textViewQuestion = findViewById(R.id.textViewQuestion);
+
 
 
                             //set question into text box only if date finished is null
                             textViewQuestion.setText(question);
+                            scrollToView(sView,textViewQuestion);
 
                             //Speak question
                             gQuestion = question;
@@ -745,18 +759,13 @@ public class SurveyQuestion extends WearableActivity {
                     public void run() {
                         tts.speak("The app will quit 30 seconds after this message ends, and " +
                                 "all progress will be lost.", TextToSpeech.QUEUE_FLUSH, null, null);
-                        tts.speak("To confirm quit, say ", TextToSpeech.QUEUE_ADD, null, null);
+                        tts.speak("To confirm quit, say: quit.", TextToSpeech.QUEUE_ADD, null,
+                                null);
 
-                        tts.playSilentUtterance(10,TextToSpeech.QUEUE_ADD,null);
-                        tts.speak("quit.",TextToSpeech.QUEUE_ADD,null,null);
-                        tts.playSilentUtterance(100,TextToSpeech.QUEUE_ADD,null);
                         tts.speak("To resume your survey, " +
-                                "respond with a valid answer to the previous question, or say ",
+                                "respond with a valid answer to the question, or say: " +
+                                        "repeat,",
                                 TextToSpeech.QUEUE_ADD,null,null);
-
-                        tts.playSilentUtterance(10,TextToSpeech.QUEUE_ADD,null);
-                        tts.speak("repeat",TextToSpeech.QUEUE_ADD,null,null);
-                        tts.playSilentUtterance(100,TextToSpeech.QUEUE_ADD,null);
 
                         tts.speak("to have me repeat the question and answer selections.",
                                 TextToSpeech.QUEUE_ADD, null, ANSWERS_DONE);
@@ -824,6 +833,41 @@ public class SurveyQuestion extends WearableActivity {
         //RadioGroup rGroup = findViewById(R.id.radioGroup);
         rGroup.clearCheck();
         rGroup.removeAllViews();
+    }
+
+    /**
+     * Used to scroll to the given view.
+     *
+     * @param scrollViewParent Parent ScrollView
+     * @param view View to which we need to scroll.
+     */
+    private void scrollToView(final ScrollView scrollViewParent, final View view) {
+        // Get deepChild Offset
+        Point childOffset = new Point();
+        getDeepChildOffset(scrollViewParent, view.getParent(), view, childOffset);
+        // Scroll to child.
+        scrollViewParent.smoothScrollTo(0, childOffset.y);
+    }
+
+    /**
+     * Used to get deep child offset.
+     * <p/>
+     * 1. We need to scroll to child in scrollview, but the child may not the direct child to scrollview.
+     * 2. So to get correct child position to scroll, we need to iterate through all of its parent views till the main parent.
+     *
+     * @param mainParent        Main Top parent.
+     * @param parent            Parent.
+     * @param child             Child.
+     * @param accumulatedOffset Accumulated Offset.
+     */
+    private void getDeepChildOffset(final ViewGroup mainParent, final ViewParent parent, final View child, final Point accumulatedOffset) {
+        ViewGroup parentGroup = (ViewGroup) parent;
+        accumulatedOffset.x += child.getLeft();
+        accumulatedOffset.y += child.getTop();
+        if (parentGroup.equals(mainParent)) {
+            return;
+        }
+        getDeepChildOffset(mainParent, parentGroup.getParent(), parentGroup, accumulatedOffset);
     }
 
     //Get the index of the optionsArray element matching myString.  Return -1 if no match found
