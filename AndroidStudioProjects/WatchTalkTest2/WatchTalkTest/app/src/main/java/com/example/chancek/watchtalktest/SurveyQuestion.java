@@ -92,7 +92,7 @@ public class SurveyQuestion extends WearableActivity {
 
     // setup timestamps (First array element is start time, subsequent elements are lengths of time
     // taken to finish the corresponding question)
-    Long startTime;
+    Long prevRecordedTime;
     ArrayList<Long> timeArray = new ArrayList<>();
 
     TextView textViewQuestion;
@@ -182,8 +182,8 @@ public class SurveyQuestion extends WearableActivity {
         numErrors = 0;
         promptQuit = false;
 
-        startTime = System.currentTimeMillis();
-        timeArray.add(startTime);
+        prevRecordedTime = System.currentTimeMillis();
+        //timeArray.add(prevRecordedTime);
 
         // Generate participant token
         String tokenURL = "https://www.assessmentcenter.net/ac_api/2014-01/Assessments/" +
@@ -240,9 +240,20 @@ public class SurveyQuestion extends WearableActivity {
             }
             String mString = str.toLowerCase();
 
-            int idx = getIndex(optionsArray, mString);
+            // try to get a valid answer from string
+            int idx = getExclusiveIndex(optionsArray, mString);
+            int val_idx = getExclusiveIndex(valueIDArray, mString);
+
+            // if a valid number is present...
+            if (val_idx != -1) {
+                if (idx == -1) // no valid answer
+                    idx = val_idx;  // use number only
+                else if (idx != val_idx) // valid number and string answer do not match
+                    idx = -1;
+            }
+
+            // Valid answer received
             if (idx != -1) {
-                // Valid answer received
                 numErrors = 0;
                 promptQuit = false;
 
@@ -253,7 +264,8 @@ public class SurveyQuestion extends WearableActivity {
 
                 String loadingText = "Loading...";
                 textViewQuestion.setText(loadingText);
-                scrollToView(sView,findViewById(rbID));
+                sView.smoothScrollTo(0,findViewById(rbID).getTop());
+                //scrollToView(sView,findViewById(rbID));
                 /*new CountDownTimer(500,100){
                     public void onTick(long millisUntilFinished) {
                         //do nothing
@@ -355,7 +367,8 @@ public class SurveyQuestion extends WearableActivity {
 
                             //set question into text box only if date finished is null
                             textViewQuestion.setText(question);
-                            scrollToView(sView,textViewQuestion);
+                            sView.smoothScrollTo(0,textViewQuestion.getTop());
+                            //scrollToView(sView,textViewQuestion);
 
                             //Speak question
                             gQuestion = question;
@@ -382,7 +395,7 @@ public class SurveyQuestion extends WearableActivity {
                             }
 
                             //Load radioGroup with Options
-                            LoadRadioGroup(optionsArray);
+                            LoadRadioGroup(optionsArray, valueIDArray);
 
                             //use tts to speak answers
                             String currentAnswer;
@@ -390,11 +403,13 @@ public class SurveyQuestion extends WearableActivity {
                             {
                                 if (i == optionsArray.size()-1)
                                 {
-                                    currentAnswer = "or " + optionsArray.get(i) + "?";
+                                    currentAnswer =
+                                            "or " + valueIDArray.get(i) + ": " + optionsArray.get(i) + "?";
                                     tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,ANSWERS_DONE);
                                 }
                                 else {
-                                    currentAnswer = optionsArray.get(i) + ", ";
+                                    currentAnswer =
+                                            valueIDArray.get(i) + ": " + optionsArray.get(i) + ", ";
                                     tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
                                     tts.playSilentUtterance(100,TextToSpeech.QUEUE_ADD,null);
                                 }
@@ -539,8 +554,9 @@ public class SurveyQuestion extends WearableActivity {
 
         Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
 
-        Long timeTaken = System.currentTimeMillis()-timeArray.get(timeArray.size()-1);
+        Long timeTaken = System.currentTimeMillis()-prevRecordedTime;
         timeArray.add(timeTaken);
+        prevRecordedTime += timeTaken;
 
         getQuestions(gToken,responseID,valueID);
     }
@@ -559,8 +575,9 @@ public class SurveyQuestion extends WearableActivity {
 
         Log.e(TAG, "Submitting answer: responseID = " + responseID + ", valueID = " + valueID);
 
-        Long timeTaken = System.currentTimeMillis()-timeArray.get(timeArray.size()-1);
+        Long timeTaken = System.currentTimeMillis()-prevRecordedTime;
         timeArray.add(timeTaken);
+        prevRecordedTime += timeTaken;
 
         getQuestions(gToken,responseID,valueID);
     }
@@ -729,11 +746,13 @@ public class SurveyQuestion extends WearableActivity {
                         {
                             if (i == optionsArray.size()-1)
                             {
-                                currentAnswer = "or " + optionsArray.get(i) + "?";
+                                currentAnswer =
+                                        "or " + valueIDArray.get(i) + ": " + optionsArray.get(i) + "?";
                                 tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,ANSWERS_DONE);
                             }
                             else {
-                                currentAnswer = optionsArray.get(i) + ", ";
+                                currentAnswer =
+                                        valueIDArray.get(i) + ": " + optionsArray.get(i) + ", ";
                                 tts.speak(currentAnswer,TextToSpeech.QUEUE_ADD,null,null);
                                 tts.playSilentUtterance(100,TextToSpeech.QUEUE_ADD,null);
                             }
@@ -799,12 +818,13 @@ public class SurveyQuestion extends WearableActivity {
         }
     }*/
 
-    public void LoadRadioGroup(ArrayList<String> optionsArr){
+    public void LoadRadioGroup(ArrayList<String> optionsArr, ArrayList<String> idArr){
         //RadioGroup rGroup = findViewById(R.id.radioGroup);
         rGroup.setOrientation(RadioGroup.VERTICAL);
         for (int i = 0;i<optionsArr.size();i++){
             RadioButton rb = new RadioButton(this);
-            rb.setText(optionsArr.get(i));
+            String setStr = idArr.get(i) + " : " + optionsArr.get(i);
+            rb.setText(setStr);
             rGroup.addView(rb,i);
 
         }
@@ -880,6 +900,23 @@ public class SurveyQuestion extends WearableActivity {
             if (myString.contains(arr.get(i).toLowerCase())){
                 index = i;
                 break;
+            }
+        }
+        return index;
+    }
+
+    //Get the index of the array element matching myString.  Return -1 if no match found
+    // or if too many matches
+    private int getExclusiveIndex(ArrayList<String> arr, String myString){
+
+        int index = -1;
+        myString = myString.toLowerCase();
+
+        for (int i=0;i<arr.size();i++){
+            if (myString.contains(arr.get(i).toLowerCase())){
+                if (index != -1)
+                    return -1;
+                index = i;
             }
         }
         return index;
