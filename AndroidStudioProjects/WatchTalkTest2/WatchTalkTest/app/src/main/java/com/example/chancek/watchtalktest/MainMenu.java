@@ -4,6 +4,10 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.app.ActivityCompat;
@@ -12,6 +16,7 @@ import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 
@@ -22,6 +27,12 @@ public class MainMenu extends WearableActivity {
     String TAG = "WATCH_TALK_TEST";
 
     TextToSpeech tts;
+    private SpeechRecognizer mySR;
+
+    int numErrors;
+    int MAX_ERRORS = 5;
+
+    public static Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +57,11 @@ public class MainMenu extends WearableActivity {
                     .RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
         }
 
+        handler = new Handler(getMainLooper());
+
+        mySR = SpeechRecognizer.createSpeechRecognizer(this);
+        mySR.setRecognitionListener(new listener());
+
         tts=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
 
             @Override
@@ -63,7 +79,7 @@ public class MainMenu extends WearableActivity {
                             Log.d(TAG, "TTS finished");
 
                             if (utteranceId.equals(TTS_DONE)){
-                                //TODO: react to what the user says
+                                getVoiceInput_noUI();
                             }
                         }
 
@@ -84,16 +100,90 @@ public class MainMenu extends WearableActivity {
                 else
                     Log.e("error", "Initialization Failed!");
 
-                tts.speak("Welcome! Press Start to begin your survey.", TextToSpeech.QUEUE_FLUSH,null,
-                        null);
+                tts.speak("Welcome!  Say start after the vibration prompt, or press the start" +
+                                " button to begin your survey.",
+                        TextToSpeech.QUEUE_FLUSH,null, TTS_DONE);
             }
         });
+    }
+
+    class listener implements RecognitionListener
+    {
+        public void onReadyForSpeech(Bundle params)
+        {
+            Log.d(TAG, "onReadyForSpeech");
+        }
+        public void onBeginningOfSpeech() {
+            Log.d(TAG, "onBeginningOfSpeech");
+        }
+        public void onRmsChanged(float rmsdB) {
+            Log.d(TAG, "onRmsChanged");
+        }
+        public void onBufferReceived(byte[] buffer) {
+            Log.d(TAG, "onBufferReceived");
+        }
+        public void onEndOfSpeech() {
+            Log.d(TAG, "onEndOfSpeech");
+        }
+        public void onError(int error) {
+            Log.d(TAG,  "error " +  error);
+            numErrors++;
+            if (numErrors > MAX_ERRORS)
+                QuitApp();
+            else
+                rePrompt();
+        }
+        public void onResults(Bundle results)
+        {
+            // Once user has finished speaking, respond appropriately
+            String str = "";
+
+            // DO NOT CHANGE promptQuit HERE
+            Log.d(TAG, "onResults " + results);
+            ArrayList data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            for (int i = 0; i < data.size(); i++)
+            {
+                //Log.d(TAG, "result " + data.get(i));
+                str += data.get(i);
+            }
+            String mString = str.toLowerCase();
+
+            // Valid answer received
+            if (mString.contains("start"))
+            {
+                startSurvey();
+            }
+            else if (mString.contains("quit"))
+            {
+                QuitApp();
+            }
+            else
+            {
+                // Invalid input
+                numErrors++;
+                if (numErrors > MAX_ERRORS)
+                    QuitApp();
+                else
+                    rePrompt();
+            }
+
+        }
+        public void onPartialResults(Bundle partialResults)
+        {
+            Log.d(TAG, "onPartialResults");
+        }
+        public void onEvent(int eventType, Bundle params)
+        {
+            Log.d(TAG, "onEvent " + eventType);
+        }
     }
 
     public void startSurvey(View view)
     {
         tts.stop();
         tts.shutdown();
+        mySR.cancel();
+        mySR.destroy();
         Intent intent;
         intent = new Intent(this, SurveyQuestion.class);
         intent.putExtra("surveyOID", surveyOID);
@@ -103,6 +193,10 @@ public class MainMenu extends WearableActivity {
 
     public void startSurvey()
     {
+        tts.stop();
+        tts.shutdown();
+        mySR.cancel();
+        mySR.destroy();
         Intent intent;
         intent = new Intent(this, SurveyQuestion.class);
         intent.putExtra("surveyOID", surveyOID);
@@ -114,17 +208,56 @@ public class MainMenu extends WearableActivity {
     {
         tts.stop();
         tts.shutdown();
+        mySR.cancel();
+        mySR.destroy();
         Intent intent;
         intent = new Intent(this, MainSettings.class);
 
         startActivity(intent);
     }
 
-    public void goToSettings()
+    // Get voice input without displaying the default pop-up window.
+    // Code = 0 means default behavior.  Code = 1 means say the startup line again first.
+    public void getVoiceInput_noUI()
     {
-        Intent intent;
-        intent = new Intent(this, MainSettings.class);
+        if (!SpeechRecognizer.isRecognitionAvailable(this))
+            Log.d(TAG, "No voice recognition available.");
+        else {
+            MainMenu.handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+                    mySR.startListening(intent);
+                    Log.d(TAG, "started listening");
+                }
+            });
+        }
+    }
 
-        startActivity(intent);
+    public void rePrompt(){
+        MainMenu.handler.post(new Runnable() {
+            @Override
+            public void run() {
+                tts.speak("Please say start after the vibration prompt, or press the start" +
+                                " button to begin your survey.",
+                        TextToSpeech.QUEUE_FLUSH,null, TTS_DONE);
+            }
+        });
+    }
+
+    public void QuitApp(){
+        tts.stop();
+        tts.shutdown();
+        mySR.cancel();
+        mySR.destroy();
+
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory( Intent.CATEGORY_HOME );
+        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(homeIntent);
+
+        this.finishAffinity();
     }
 }

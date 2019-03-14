@@ -244,8 +244,13 @@ public class SurveyQuestion extends WearableActivity {
             int idx = getExclusiveIndex(optionsArray, mString);
             int val_idx = getExclusiveIndex(valueIDArray, mString);
 
+            // If there are too many numbers/answers, go to error response
+            if (idx == -2 || val_idx == -2)
+            {
+                idx = -1;
+            }
             // if a valid number is present...
-            if (val_idx != -1) {
+            else if (val_idx != -1) {
                 if (idx == -1) // no valid answer
                     idx = val_idx;  // use number only
                 else if (idx != val_idx) // valid number and string answer do not match
@@ -906,7 +911,7 @@ public class SurveyQuestion extends WearableActivity {
     }
 
     //Get the index of the array element matching myString.  Return -1 if no match found
-    // or if too many matches
+    // or -2 if too many matches
     private int getExclusiveIndex(ArrayList<String> arr, String myString){
 
         int index = -1;
@@ -915,7 +920,7 @@ public class SurveyQuestion extends WearableActivity {
         for (int i=0;i<arr.size();i++){
             if (myString.contains(arr.get(i).toLowerCase())){
                 if (index != -1)
-                    return -1;
+                    return -2;
                 index = i;
             }
         }
